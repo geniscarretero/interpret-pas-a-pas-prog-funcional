@@ -1,10 +1,10 @@
 module HSTipus where
 
-data Expr = Val Int              -- Un número (42)
-          | Var String           -- Una variable (x, y, suma)
-          | Op BinOp Expr Expr   -- Una operació (1 + 2)
-          | App Expr Expr        -- Aplicació de funció (f x)
-          | Lam [String] Expr      -- Funció lambda (\x -> x + 1)
+data Expr = Val Int                 -- Un número (42)
+          | Var String              -- Una variable (x, y, suma)
+          | Op BinOp Expr Expr      -- Una operació (1 + 2)
+          | App Expr Expr           -- Aplicació de funció (f x)
+          | Lam [String] Expr       -- Funció lambda (\x -> x + 1)
           deriving (Show)
 
 data BinOp = Add | Sub | Mul | Div          -- Aritmètiques
