@@ -81,7 +81,7 @@ mes p = do
 --Gramàtica
 
 paraulesProhibides :: [String]
-paraulesProhibides = ["or", "and"]
+paraulesProhibides = ["or", "and", "not"]
 
 nomVariable :: Parser String
 nomVariable = token $ do
@@ -170,13 +170,24 @@ term = do
 
 ap :: Parser Expr
 ap = do
-    x <- atom
-    ys <- mul atom
+    x <- unari
+    ys <- mul unari
     return (insert (x:ys))
         where
             insert :: [Expr] -> Expr
             insert [e] = e
             insert exprs = (App (insert (init exprs)) (last exprs))
+
+unari :: Parser Expr
+unari = 
+    (do (token (sat (== '-')))
+        x <- unari
+        return (Op Sub (Val 0) x))
+    <|> (do
+        (token (stringMatch "not"))
+        x <- unari
+        return (Not x))
+    <|> atom
 
 atom :: Parser Expr
 atom = (token (sat (== '(')) *> expr <* token (sat (== ')')))
@@ -193,4 +204,8 @@ lam = do
     vars <- mes nomVariable
     _ <- token (stringMatch "->")
     exp <- token expr
-    return (Lam vars exp)
+    return (insert vars exp)
+        where
+            insert :: [String] -> Expr -> Expr
+            insert [a] e = (Lam a e)
+            insert (v:vrs) e = (Lam v (insert vrs e))
