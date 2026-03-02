@@ -1,0 +1,13 @@
+cabal-version:      2.4
+name:               bhct
+version:            0.1.0.0
+
+executable bhct
+    main-is:          BHCt.hs
+    other-modules:    HSParser, HSTipus
+    build-depends:    
+        base >= 4.7 && < 5,
+        haskeline >= 0.8
+    hs-source-dirs:   .
+
+    default-language: Haskell2010

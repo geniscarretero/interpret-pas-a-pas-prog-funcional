@@ -83,6 +83,9 @@ mes p = do
 paraulesProhibides :: [String]
 paraulesProhibides = ["or", "and", "not"]
 
+anyChar :: Parser Char
+anyChar = item
+
 nomVariable :: Parser String
 nomVariable = token $ do
     x <- lletra
