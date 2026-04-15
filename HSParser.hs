@@ -111,15 +111,15 @@ intToken = token $ do
     s <- mes digit
     return (read s)
 
-addSubParser :: Parser BinOp
+addSubParser :: Parser OpType
 addSubParser = (token (sat (== '+')) >> return Add)
            <|> (token (sat (== '-')) >> return Sub)
 
-mulDivParser :: Parser BinOp
+mulDivParser :: Parser OpType
 mulDivParser = (token (sat (== '*')) >> return Mul)
            <|> (token (sat (== '/')) >> return Div)
 
-compParser :: Parser BinOp
+compParser :: Parser OpType
 compParser =  (token (stringMatch "<=") >> return Leq) 
           <|> (token (stringMatch ">=") >> return Geq)
           <|> (token (stringMatch "==") >> return Eq )
@@ -136,7 +136,7 @@ logicOr = do
     (do 
         token (stringMatch "or")
         e2 <- logicOr
-        return (Op Or t1 e2)
+        return (App (App (Op Or) t1) e2)
         ) <|> return t1
 
 logicAnd :: Parser Expr
@@ -144,7 +144,7 @@ logicAnd = do
     t1 <- comp
     (do token (stringMatch "and")
         e2 <- logicAnd
-        return (Op And t1 e2)
+        return (App (App (Op And) t1) e2)
         ) <|> return t1
 
 comp :: Parser Expr
@@ -152,7 +152,7 @@ comp = do
     t1 <- suma
     (do o <- compParser
         e2 <- logicAnd
-        return (Op o t1 e2)
+        return (App (App (Op o) t1) e2)
         ) <|> return t1
 
 suma :: Parser Expr
@@ -160,7 +160,7 @@ suma = do
     t1 <- term
     (do o <- addSubParser
         e2 <- suma
-        return (Op o t1 e2)
+        return (App (App (Op o) t1) e2)
         ) <|> return t1
 
 term :: Parser Expr
@@ -168,7 +168,7 @@ term = do
     a1 <- ap
     (do o <- mulDivParser
         t2 <- term
-        return (Op o a1 t2)
+        return (App (App (Op o) a1) t2)
         ) <|> return a1
 
 ap :: Parser Expr
@@ -185,11 +185,11 @@ unari :: Parser Expr
 unari = 
     (do (token (sat (== '-')))
         x <- unari
-        return (Op Sub (Val 0) x))
+        return (App (App (Op Sub) (Val 0)) x) )
     <|> (do
         (token (stringMatch "not"))
         x <- unari
-        return (Not x))
+        return (App (Op Not) x))
     <|> atom
 
 atom :: Parser Expr

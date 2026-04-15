@@ -1,6 +1,7 @@
 import System.Console.Haskeline
 import HSParser
 import HSTipus
+import HSInferenciaTipus
 import Control.Applicative (Alternative (empty, (<|>)))
 
 main :: IO ()
@@ -14,11 +15,16 @@ main = runInputT defaultSettings loop
             Just ":quit" -> return ()
             Just input -> do
                 case parse expr input of
-                    [(res, "")] -> outputStrLn $ show res
                     [] -> (do
                         outputStrLn $ "Error:"
                         outputStrLn $ input
                         outputStrLn $ "^--- El parser ha parat aquí"
+                        )
+                    [(res, "")] -> (do
+                        outputStrLn $ show res
+                        case infereix envInicial res 0 of
+                          Left text -> outputStrLn $ text
+                          Right (t, _, _) -> outputStrLn $ show $showTipus t 
                         )
                     [(res, rest)] -> do
                         outputStrLn $ "Error: "
@@ -27,5 +33,7 @@ main = runInputT defaultSettings loop
                         let pos = length input - length rest
                         outputStrLn $ input
                         outputStrLn $ replicate pos ' ' ++ "^--- El parser ha parat aquí"
+
+
 
                 loop

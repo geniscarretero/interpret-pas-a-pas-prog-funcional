@@ -7,10 +7,13 @@
             -- Missatges d'on està el fallo
         -- Si sí:
             -- Imprimir l'arbre 
+-- Preparar els tipus (Dimecres 18 de Març)
+-- Guardar tipus de funcions predefinides (Dijous 19 de Març)
+-- Enviar correu per ajendar reunió presencial (intentar Setmana 23 de Març)
 -- Reunió
 -- Inferencia tipus
 -- Reunió 2
--- Eval lazy
+-- Eval lazy<
 -- Super combinadors
 -- Guardes
 -- Composició
