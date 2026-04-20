@@ -66,14 +66,13 @@ infereix ctx (Var a) n = case lookup a ctx of
                   Nothing -> Right ((TVar ("t"++show n)), [], n+1)  --no hauria de passar
                   Just t -> Right (t, [], n)
 
-infereix ctx (Lam s e) n =
-  let
-    t1 = infereix ((s, (TVar ("t"++show n))):ctx) e n
-  in
-    case t1 of
-      Left text -> Left text -- Propaguem error amunt
-      Right (t, s, i) -> Right ((TFun (TVar ("t" ++ show n)) t ), s, i+1)
-
+infereix ctx (Lam s e) n = do
+  t_s <- Right (TVar ("t"++ show n ))     --Tipus de variable de lambda
+  (t1, s1, n1) <- infereix ((s,t_s):ctx) e (n+1) 
+  t_retorn <- Right (aplicaSubst s1 (TFun t_s t1))
+  return (t_retorn, s1, n1+1)
+        
+        
 infereix ctx (App e0 e1) n = do
   (t0, s0, n1) <- infereix ctx e0 n                      -- 1. Analitzem funció
   (t1, s1, n2) <- infereix (aplicaSubstCtx s0 ctx) e1 n1  -- 2. Analitzem argument amb el que hem après a s0
