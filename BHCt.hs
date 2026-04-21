@@ -24,7 +24,7 @@ main = runInputT defaultSettings loop
                         outputStrLn $ show res
                         case infereix envInicial res 0 of
                           Left text -> outputStrLn $ text
-                          Right (t, _, _) -> outputStrLn $ show $showTipus t 
+                          Right (t, _, _) -> outputStrLn $showTipus t 
                         )
                     [(res, rest)] -> do
                         outputStrLn $ "Error: "
