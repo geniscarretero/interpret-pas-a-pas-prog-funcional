@@ -1,0 +1,14 @@
+bhct> Error:
+
+^--- El parser ha parat aquí
+bhct> Val 123
+bhct> App (App (Var "+") (Val 12)) (Val 1)
+bhct> Lam "x" (App (App (Var "+") (Var "x")) (Val 1))
+bhct> Lam "x" (Lam "y" (App (App (Var "+") (Var "x")) (Var "y")))
+bhct> App (Lam "x" (App (App (Var "*") (Var "x")) (Val 3))) (Val 6)
+bhct> Val 1
+bhct> App (Var "const") (Var "True")
+bhct> Var "True"
+bhct> Lam "x" (App (App (Var "<") (Var "x")) (Val 10))
+bhct> App (Var ".") (Lam "x" (App (App (Var "*") (Var "x")) (Val 3)))
+bhct> 

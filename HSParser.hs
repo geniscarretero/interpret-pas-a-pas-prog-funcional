@@ -3,7 +3,7 @@ module HSParser where
 import Control.Applicative (Alternative (empty, (<|>)))
 import Control.Monad (MonadPlus (..), void)
 import qualified Data.Bifunctor as Bifunctor
-import Data.Char (isDigit, isLower)
+import Data.Char (isDigit, isLower, isLetter)
 import HSTipus
 
 -- Parser
@@ -63,7 +63,7 @@ digit :: Parser Char
 digit = sat isDigit
 
 lletra :: Parser Char
-lletra = sat (\x -> elem x ['a'..'z'] || elem x ['A'..'Z'])
+lletra = sat isLetter
 
 mul :: Parser a -> Parser [a]
 mul p = do
@@ -80,8 +80,6 @@ mes p = do
 
 --Gramàtica
 
-paraulesProhibides :: [String]
-paraulesProhibides = ["or", "and", "not"]
 
 anyChar :: Parser Char
 anyChar = item
@@ -90,8 +88,10 @@ nomVariable :: Parser String
 nomVariable = token $ do
     x <- lletra
     xs <- mul (lletra <|> digit)
-    if elem (x:xs) paraulesProhibides then empty
-    else return (x:xs)
+    return (x:xs)
+
+nomOperador :: Parser String
+nomOperador = (token (mes (sat (`elem` ".+-$*/%=<>:!&|"))))
 
 stringMatch :: String -> Parser String
 stringMatch (c:str) = do
@@ -100,8 +100,19 @@ stringMatch (c:str) = do
     return (x:xs)
 stringMatch [] = do return ""
 
-espais :: Parser String
-espais = mul (sat (\x -> x == ' ' || x == '\n' || x == '\t' ))
+comentari :: Parser ()
+comentari = do 
+  stringMatch "--" 
+  mul (sat (/= '\n'))
+  return ()
+
+blancOComentari :: Parser ()
+blancOComentari =  
+  (sat (\x -> x == ' ' || x == '\n' || x == '\t') *> return ()) 
+  <|> comentari
+
+espais :: Parser [()]
+espais = mul blancOComentari
 
 token :: Parser a -> Parser a
 token p = espais *> p <* espais
@@ -111,20 +122,20 @@ intToken = token $ do
     s <- mes digit
     return (read s)
 
-addSubParser :: Parser OpType
-addSubParser = (token (sat (== '+')) >> return Add)
-           <|> (token (sat (== '-')) >> return Sub)
+addSubParser :: Parser String
+addSubParser = (token (sat (== '+')) >> return "+")
+           <|> (token (sat (== '-')) >> return "-")
 
-mulDivParser :: Parser OpType
-mulDivParser = (token (sat (== '*')) >> return Mul)
-           <|> (token (sat (== '/')) >> return Div)
+mulDivParser :: Parser String
+mulDivParser = (token (sat (== '*')) >> return "*")
+           <|> (token (sat (== '/')) >> return "/")
 
-compParser :: Parser OpType
-compParser =  (token (stringMatch "<=") >> return Leq) 
-          <|> (token (stringMatch ">=") >> return Geq)
-          <|> (token (stringMatch "==") >> return Eq )
-          <|> (token (sat (== '<'))     >> return Lt )
-          <|> (token (sat (== '>'))     >> return Gt )
+compParser :: Parser String
+compParser =  (token (stringMatch "<=") >> return "<=") 
+          <|> (token (stringMatch ">=") >> return ">=")
+          <|> (token (stringMatch "==") >> return "==" )
+          <|> (token (sat (== '<'))     >> return "<")
+          <|> (token (sat (== '>'))     >> return ">" )
 
 expr :: Parser Expr
 expr = lam  <|> logicOr -- <|> ifThenElse
@@ -136,7 +147,7 @@ logicOr = do
     (do 
         token (stringMatch "or")
         e2 <- logicOr
-        return (App (App (Op Or) t1) e2)
+        return (App (App (Var "or") t1) e2)
         ) <|> return t1
 
 logicAnd :: Parser Expr
@@ -144,7 +155,7 @@ logicAnd = do
     t1 <- comp
     (do token (stringMatch "and")
         e2 <- logicAnd
-        return (App (App (Op And) t1) e2)
+        return (App (App (Var "and") t1) e2)
         ) <|> return t1
 
 comp :: Parser Expr
@@ -152,7 +163,7 @@ comp = do
     t1 <- suma
     (do o <- compParser
         e2 <- logicAnd
-        return (App (App (Op o) t1) e2)
+        return (App (App (Var o) t1) e2)
         ) <|> return t1
 
 suma :: Parser Expr
@@ -160,7 +171,7 @@ suma = do
     t1 <- term
     (do o <- addSubParser
         e2 <- suma
-        return (App (App (Op o) t1) e2)
+        return (App (App (Var o) t1) e2)
         ) <|> return t1
 
 term :: Parser Expr
@@ -168,7 +179,7 @@ term = do
     a1 <- ap
     (do o <- mulDivParser
         t2 <- term
-        return (App (App (Op o) a1) t2)
+        return (App (App (Var o) a1) t2)
         ) <|> return a1
 
 ap :: Parser Expr
@@ -185,11 +196,11 @@ unari :: Parser Expr
 unari = 
     (do (token (sat (== '-')))
         x <- unari
-        return (App (App (Op Sub) (Val 0)) x) )
+        return (App (App (Var "-") (Val 0)) x) )
     <|> (do
         (token (stringMatch "not"))
         x <- unari
-        return (App (Op Not) x))
+        return (App (Var "not") x))
     <|> atom
 
 atom :: Parser Expr
@@ -198,7 +209,7 @@ atom = (token (sat (== '(')) *> expr <* token (sat (== ')')))
     x <- intToken
     return (Val x)
     <|> do
-    y <- nomVariable
+    y <- (nomVariable <|> (token(sat (== '(')) *> nomOperador <* token (sat (== ')'))))
     return (Var y)
 
 lam :: Parser Expr

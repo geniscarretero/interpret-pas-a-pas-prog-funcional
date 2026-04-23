@@ -1,5 +1,11 @@
-Int
-Int
-Int -> Int
-Int -> Int -> Int
-Int
+bhct> Int
+bhct> Int
+bhct> Int -> Int
+bhct> Int -> Int -> Int
+bhct> Int
+bhct> Int
+bhct> b -> Bool
+bhct> Bool
+bhct> Int -> Bool
+bhct> (a -> Int) -> a -> Int
+bhct> 

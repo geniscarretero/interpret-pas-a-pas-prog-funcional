@@ -1,0 +1,12 @@
+bhct> Error:
+-- 1. Polimorfisme bàsic i aplicació^--- El parser ha parat aquí
+bhct> Bool
+bhct> a2 -> a2
+bhct> Int
+bhct> a2 -> a2
+bhct> Error:
+^--- El parser ha parat aquí
+bhct> Error:
+-- 2. Composició de funcions (El punt és el cas més difícil)^--- El parser ha parat aquí
+bhct> (a1 -> b1) -> a1 -> c1
+bhct> 

@@ -1,6 +1,7 @@
 module HSInferenciaTipus where
 
 import HSTipus
+import Control.Applicative ((<|>))
 
 -- Context és [(nom_variable, tipus)]
 type Context = [(String, Tipus)]
@@ -27,20 +28,26 @@ aplicaSubstCtx subs ((st,t):ctx) = ((st, aplicaSubst subs t): (aplicaSubstCtx su
 generaSubst :: Tipus -> Tipus -> Either String Subst
 generaSubst TInt TBool = Left "No es pot unificar un enter amb un booleà"
 generaSubst TBool TInt = Left "No es pot unificar un booleà amb un enter"
+generaSubst (TFun (TFun t11 t12) t2) (TFun (TFun t31 t32) t4) = do 
+  first <- generaSubst (TFun t11 t12) (TFun t31 t32)
+  second <- generaSubst t2 t4
+  return (first ++ second)
+generaSubst (TFun (TFun t11 t12) t2) (TFun t3 t4) = do 
+  first <- generaSubst (TFun t11 t12) (TFun t3 t4)
+  second <- generaSubst t2 t4
+  return (first ++ second)
+generaSubst (TFun t1 t2) (TFun (TFun t31 t32) t4) = do 
+  first <- generaSubst (TFun t1 t2) (TFun t31 t32)
+  second <- generaSubst t2 t4
+  return (first ++ second)
 generaSubst (TFun t1 t2) (TFun t3 t4) = do 
   first <- generaSubst t1 t3
   second <- generaSubst t2 t4
   return (first ++ second)
-generaSubst (TVar s1) (TVar s2) = Right [(s1, (TVar s2)), (s2, (TVar s1))]
-generaSubst (TVar s) t = Right [(s, t)]
+generaSubst (TVar s1) (TVar s2) = Right [(s1, (TVar s2)), (s2, (TVar s1))]  
 generaSubst t (TVar s) = Right [(s, t)]
-generaSubst _ _ = Right []
-
--- Donats dos tipus se suposa que s'ha de fer una aplicació (l'esquerra s'aplica al dret)
--- Sempre que l'esquerra no sigui una funció, serà una aplicació incorrecta
-checkAppTypes :: Tipus -> Tipus -> Either String String
-checkAppTypes (TFun _ _) _ = Right "OK"
-checkAppTypes _ _ = Left "Estàs intentant fer una aplicació a una cosa que no és una funció" 
+generaSubst (TVar s) t = Right [(s, t)]
+generaSubst _ _ =  Right []
 
 envInicial :: Context
 envInicial = [  ("+", TFun TInt (TFun TInt TInt)),
@@ -54,30 +61,32 @@ envInicial = [  ("+", TFun TInt (TFun TInt TInt)),
                 ("==", TFun TInt (TFun TInt TBool)),
                 ("and", TFun TBool (TFun TBool TBool)),
                 ("or", TFun TBool (TFun TBool TBool)),
+                ("True", TBool),
+                ("False", TBool),
                 ("not", TFun TBool TBool),
                 ("id", TFun (TVar "a") (TVar "a")),
-                ("const", TFun (TVar "a") (TFun (TVar "b") (TVar "a")))
+                ("const", TFun (TVar "a") (TFun (TVar "b") (TVar "a"))),
+                (".", TFun (TFun (TVar "b") (TVar "c")) (TFun (TFun (TVar "a") (TVar "b")) (TFun (TVar "a") (TVar "c"))))
                 ]
 
+renameTVar :: Tipus -> Int -> Maybe Tipus
+renameTVar (TFun t1 t2) n = do 
+  r1 <- (renameTVar t1 n)
+  r2 <- (renameTVar t2 n)
+  return (TFun r1 r2)
+renameTVar (TVar ('t':r)) n = Nothing  --la deixem igual si comença amb t, (meves)
+renameTVar (TVar s) n = Just (TVar (s++(show n)))
+renameTVar t _ = Nothing
 
 infereix :: Context -> Expr -> Int -> Either String (Tipus, Subst, Int)
 infereix _ (Val _) i = Right (TInt, [], i) 
-infereix _ (Op Add) i = Right ((let Just x = (lookup "+" envInicial) in x), [], i)
-infereix _ (Op Sub) i = Right ((let Just x = (lookup "-" envInicial) in x), [], i)
-infereix _ (Op Div) i = Right ((let Just x = (lookup "/" envInicial) in x), [], i)
-infereix _ (Op Mul) i = Right ((let Just x = (lookup "*" envInicial) in x), [], i)
-infereix _ (Op Lt) i = Right ((let Just x = (lookup "<" envInicial) in x), [], i)
-infereix _ (Op Gt) i = Right ((let Just x = (lookup ">" envInicial) in x), [], i)
-infereix _ (Op Leq) i = Right ((let Just x = (lookup "<=" envInicial) in x), [], i)
-infereix _ (Op Geq) i = Right ((let Just x = (lookup ">=" envInicial) in x), [], i)
-infereix _ (Op Eq) i = Right ((let Just x = (lookup "==" envInicial) in x), [], i)
-infereix _ (Op And) i = Right ((let Just x = (lookup "and" envInicial ) in x), [], i)
-infereix _ (Op Or) i = Right ((let Just x = (lookup "or" envInicial ) in x), [], i)
-infereix _ (Op Not) i = Right ((let Just x = (lookup "not" envInicial ) in x), [], i)
 
 infereix ctx (Var a) n = case lookup a ctx of
                   Nothing -> Left "Variable no trobada"
-                  Just t -> Right (t, [], n)
+                  Just t -> do 
+                    case renameTVar t n of
+                      Just t1 -> Right (t1, [], (n+1))
+                      Nothing -> Right (t, [], n)
 
 infereix ctx (Lam s e) n = do
   t_s <- Right (TVar ("t"++ show n ))                     -- Tipus de variable de lambda (b)
@@ -90,10 +99,10 @@ infereix ctx (App e1 e2) n = do
   (t1, s1, n1) <- infereix ctx e1 n                       -- Tipus del cos de l'aplicació (b)
   (t2, s2, n2) <- infereix (aplicaSubstCtx s1 ctx) e2 n1  -- Tipus del cos de lambda (c)
   
-  checkAppTypes (aplicaSubst s2 t1) t2                    -- Comprova que es pugui fer l'aplicació
-
   t3 <- Right (TVar ("t" ++ show n2))                     -- Tipus de l'aplicació (a)
 
   s3 <- generaSubst (aplicaSubst s2 t1) (TFun t2 t3)      -- b = c -> a
+
+  
 
   return ((aplicaSubst s3 t3), (s1++s2++s3), (n2+1))      -- Retorna el tipus de l'aplicació ja substituit
