@@ -44,6 +44,9 @@ instance Alternative Parser where
   empty = zero
   (<|>) = or'
 
+paraulesProhibides :: [String]
+paraulesProhibides = []
+
 result :: a -> Parser a
 result val = Parser $ \inp -> [(val, inp)]
 
@@ -88,7 +91,8 @@ nomVariable :: Parser String
 nomVariable = token $ do
     x <- lletra
     xs <- mul (lletra <|> digit)
-    return (x:xs)
+    if elem (x:xs) paraulesProhibides then empty
+    else return (x:xs)
 
 nomOperador :: Parser String
 nomOperador = (token (mes (sat (`elem` ".+-$*/%=<>:!&|"))))
@@ -145,17 +149,17 @@ logicOr :: Parser Expr
 logicOr = do
     t1 <- logicAnd
     (do 
-        token (stringMatch "or")
+        token (stringMatch "||")
         e2 <- logicOr
-        return (App (App (Var "or") t1) e2)
+        return (App (App (Var "||") t1) e2)
         ) <|> return t1
 
 logicAnd :: Parser Expr
 logicAnd = do
     t1 <- comp
-    (do token (stringMatch "and")
+    (do token (stringMatch "&&")
         e2 <- logicAnd
-        return (App (App (Var "and") t1) e2)
+        return (App (App (Var "&&") t1) e2)
         ) <|> return t1
 
 comp :: Parser Expr
@@ -184,24 +188,14 @@ term = do
 
 ap :: Parser Expr
 ap = do
-    x <- unari
-    ys <- mul unari
+    x <- atom
+    ys <- mul atom
     return (insert (x:ys))
         where
             insert :: [Expr] -> Expr
             insert [e] = e
             insert exprs = (App (insert (init exprs)) (last exprs))
 
-unari :: Parser Expr
-unari = 
-    (do (token (sat (== '-')))
-        x <- unari
-        return (App (App (Var "-") (Val 0)) x) )
-    <|> (do
-        (token (stringMatch "not"))
-        x <- unari
-        return (App (Var "not") x))
-    <|> atom
 
 atom :: Parser Expr
 atom = (token (sat (== '(')) *> expr <* token (sat (== ')')))

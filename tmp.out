@@ -1,12 +1,31 @@
-bhct> Error:
--- 1. Polimorfisme bàsic i aplicació^--- El parser ha parat aquí
+bhct> 
 bhct> Bool
 bhct> a2 -> a2
 bhct> Int
 bhct> a2 -> a2
-bhct> Error:
-^--- El parser ha parat aquí
-bhct> Error:
--- 2. Composició de funcions (El punt és el cas més difícil)^--- El parser ha parat aquí
+bhct> 
+bhct> 
 bhct> (a1 -> b1) -> a1 -> c1
+bhct> a1 -> c1
+bhct> Int -> Int
+bhct> Int -> Bool
+bhct> 
+bhct> 
+bhct> (t4 -> t4) -> t4 -> t4
+bhct> Int -> Int
+bhct> Bool -> Bool
+bhct> 
+bhct> 
+bhct> Int -> Bool
+bhct> Int -> Int -> t8
+bhct> 
+bhct> 
+bhct> Int -> Bool
+bhct> (Bool -> t5) -> Int -> t5
+bhct> 
+bhct> 
+bhct> No es pot unificar un enter amb un booleà
+bhct> No es pot unificar un booleà amb un enter
+bhct> t3
+bhct> No es pot unificar un booleà amb un enter
 bhct> 

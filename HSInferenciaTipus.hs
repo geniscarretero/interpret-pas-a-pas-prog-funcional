@@ -28,23 +28,12 @@ aplicaSubstCtx subs ((st,t):ctx) = ((st, aplicaSubst subs t): (aplicaSubstCtx su
 generaSubst :: Tipus -> Tipus -> Either String Subst
 generaSubst TInt TBool = Left "No es pot unificar un enter amb un booleà"
 generaSubst TBool TInt = Left "No es pot unificar un booleà amb un enter"
-generaSubst (TFun (TFun t11 t12) t2) (TFun (TFun t31 t32) t4) = do 
-  first <- generaSubst (TFun t11 t12) (TFun t31 t32)
-  second <- generaSubst t2 t4
-  return (first ++ second)
-generaSubst (TFun (TFun t11 t12) t2) (TFun t3 t4) = do 
-  first <- generaSubst (TFun t11 t12) (TFun t3 t4)
-  second <- generaSubst t2 t4
-  return (first ++ second)
-generaSubst (TFun t1 t2) (TFun (TFun t31 t32) t4) = do 
-  first <- generaSubst (TFun t1 t2) (TFun t31 t32)
-  second <- generaSubst t2 t4
-  return (first ++ second)
 generaSubst (TFun t1 t2) (TFun t3 t4) = do 
   first <- generaSubst t1 t3
   second <- generaSubst t2 t4
   return (first ++ second)
-generaSubst (TVar s1) (TVar s2) = Right [(s1, (TVar s2)), (s2, (TVar s1))]  
+generaSubst (TVar ('t':s1)) (TVar s2) = Right [(('t':s1), (TVar s2))]  
+generaSubst (TVar s1) (TVar s2) = Right [(s2, (TVar s1))]  
 generaSubst t (TVar s) = Right [(s, t)]
 generaSubst (TVar s) t = Right [(s, t)]
 generaSubst _ _ =  Right []
@@ -59,8 +48,8 @@ envInicial = [  ("+", TFun TInt (TFun TInt TInt)),
                 ("<=", TFun TInt (TFun TInt TBool)),
                 (">=", TFun TInt (TFun TInt TBool)),
                 ("==", TFun TInt (TFun TInt TBool)),
-                ("and", TFun TBool (TFun TBool TBool)),
-                ("or", TFun TBool (TFun TBool TBool)),
+                ("&&", TFun TBool (TFun TBool TBool)),
+                ("||", TFun TBool (TFun TBool TBool)),
                 ("True", TBool),
                 ("False", TBool),
                 ("not", TFun TBool TBool),

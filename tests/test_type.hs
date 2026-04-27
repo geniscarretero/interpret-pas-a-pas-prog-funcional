@@ -7,7 +7,7 @@
 -- 2. Composició de funcions (El punt és el cas més difícil)
 :t (.) not (const False)
 :t (.) id id
-:t (\x -> x + 1) . (\y -> y * 2)
+:t (.) (\x -> x + 1) (\y -> y * 2)
 :t (.) (\b -> not b) (\x -> x > 5)
 
 -- 3. Funcions d'ordre superior (passar funcions com a arguments)
@@ -17,7 +17,7 @@
 
 -- 4. Unificació múltiple amb operadors
 :t (\x -> (x + 1) > 0)
-:t (\x y -> (x == y) and (x > 0))
+:t (\x y -> (x == y) && (x > 0))
 
 -- 5. Casos de "Shadowing" i Scope (comprova si el context es neteja bé)
 :t (\x -> (\x -> x > 0) (x + 1))

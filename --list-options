@@ -1,14 +1,31 @@
-bhct> Error:
-
-^--- El parser ha parat aquí
-bhct> Val 123
-bhct> App (App (Var "+") (Val 12)) (Val 1)
-bhct> Lam "x" (App (App (Var "+") (Var "x")) (Val 1))
-bhct> Lam "x" (Lam "y" (App (App (Var "+") (Var "x")) (Var "y")))
-bhct> App (Lam "x" (App (App (Var "*") (Var "x")) (Val 3))) (Val 6)
-bhct> Val 1
-bhct> App (Var "const") (Var "True")
-bhct> Var "True"
-bhct> Lam "x" (App (App (Var "<") (Var "x")) (Val 10))
-bhct> App (Var ".") (Lam "x" (App (App (Var "*") (Var "x")) (Val 3)))
+bhct> 
+bhct> Bool
+bhct> a2 -> a2
+bhct> Int
+bhct> a2 -> a2
+bhct> 
+bhct> 
+bhct> (a1 -> b1) -> a1 -> c1
+bhct> a1 -> c1
+bhct> Int -> Int
+bhct> Int -> Bool
+bhct> 
+bhct> 
+bhct> (t4 -> t4) -> t4 -> t4
+bhct> Int -> Int
+bhct> Bool -> Bool
+bhct> 
+bhct> 
+bhct> Int -> Bool
+bhct> Int -> Int -> t8
+bhct> 
+bhct> 
+bhct> Int -> Bool
+bhct> (Bool -> t5) -> Int -> t5
+bhct> 
+bhct> 
+bhct> No es pot unificar un enter amb un booleà
+bhct> No es pot unificar un booleà amb un enter
+bhct> t3
+bhct> No es pot unificar un booleà amb un enter
 bhct> 
