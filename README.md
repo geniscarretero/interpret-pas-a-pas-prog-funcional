@@ -6,8 +6,8 @@ Un intèrpret pas a pas per a un subconjunt de Haskell, construït amb Cabal. Ac
 - **bhct.cabal** - Configuració de construcció de Cabal
 - **HSParser.hs** - Parser per a operacions bàsiques
 - **HSTipus.hs** - Definicions de tipus
-- HSInferenciaTipus.hs - Inferència de tipus
-- HSEval.hs - Avaluació lazy
+- **HSInferenciaTipus.hs** - Inferència de tipus
+- **HSEval.hs** - Avaluació lazy
 - **BHCt.hs** - Punt d'entrada principal amb intèrpret línia per línia
 
 ## Primer Passos
@@ -24,7 +24,7 @@ Si es vol veure l'ast:
 ```bash
 :a (+) 2 3
 ```
-Si es vol usar de forma normal, avaluant les expressions:
+Si es vol usar de forma normal, avaluant les expressions (en procés):
 ```bash
 (\x -> x * 2) 2
 ```
