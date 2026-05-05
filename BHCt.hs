@@ -1,8 +1,10 @@
 import System.Console.Haskeline
 import HSParser
+import HSEval
 import HSTipus
 import HSInferenciaTipus
 import Control.Applicative (Alternative (empty, (<|>)))
+import qualified Data.IntMap as IM
 import Data.List (isPrefixOf)
 import Data.Char (isSpace)
 
@@ -14,7 +16,8 @@ esComentari l = "--" `isPrefixOf` (dropWhile isSpace l)
 output :: Maybe String -> Mode -> Maybe String
 output Nothing _ = Nothing
 output (Just ":quit") _ = Nothing
-output (Just (':':'t':' ':input)) Ast = output (Just input) Type
+output (Just (':':'t':' ':input)) Eval = output (Just input) Type
+output (Just (':':'a':' ':input)) Eval = output (Just input) Ast
 output (Just input) m = (do
   let l = parse expr input
   case l of
@@ -30,6 +33,10 @@ output (Just input) m = (do
               Left text -> return text
               Right (t, _, _) -> return (showTipus t)
             )
+          Eval -> (do
+            let (a, hs) = ast2graph res (0, IM.empty) []  
+            return (show (a,hs))
+            )
         )
     [(res, rest)] -> (do 
         let pos = length input - length rest
@@ -43,7 +50,7 @@ main = runInputT defaultSettings loop
     loop :: InputT IO ()
     loop = do
         minput <- getInputLine "bhct> "
-        let result = output minput Ast       -- De moment el mode per defecte és Ast però serà Eval
+        let result = output minput Eval       -- De moment el mode per defecte és Ast però serà Eval
         case result of 
           Nothing -> return ()
           Just o -> (do

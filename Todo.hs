@@ -12,12 +12,14 @@
 -- Enviar correu per ajendar reunió presencial (intentar Setmana 23 de Març)  (Fet)
 -- Reunió                                                                     (Fet)
 -- Inferencia tipus                                                           (Fet)
--- Reunió 2
+-- Reunió 2                                                                   (Fet)
 -- Eval lazy
 -- Super combinadors
--- Guardes
+-- Guardes / if-else
+-- Let
 -- Composició
 -- Constructors
 -- Patrons
+-- Memòria
 
 -- Dilluns matí fins 13 i dijous 10-16

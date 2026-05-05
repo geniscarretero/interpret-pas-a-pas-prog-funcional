@@ -1,10 +1,10 @@
-123
-12 + 1
-(\x -> x + 1)
-(\x y -> x + y)
-(\x -> x*3) 6
-1
-const True
-True
-(\x -> x < 10)
-(.) (\x -> x*3)
+:a 123
+:a 12 + 1
+:a (\x -> x + 1)
+:a (\x y -> x + y)
+:a (\x -> x*3) 6
+:a 1
+:a const True
+:a True
+:a (\x -> x < 10)
+:a (.) (\x -> x*3)

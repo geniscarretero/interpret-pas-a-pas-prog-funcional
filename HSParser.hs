@@ -209,7 +209,7 @@ atom = (token (sat (== '(')) *> expr <* token (sat (== ')')))
 lam :: Parser Expr
 lam = do 
     _ <- token (sat (== '\\'))
-    vars <- mes nomVariable
+    vars <- mes (nomVariable <|> (token (mes digit)))
     _ <- token (stringMatch "->")
     exp <- token expr
     return (insert vars exp)

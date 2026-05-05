@@ -1,7 +1,7 @@
 module HSInferenciaTipus where
 
 import HSTipus
-import Control.Applicative ((<|>))
+import Data.Char (isDigit)
 
 -- Context és [(nom_variable, tipus)]
 type Context = [(String, Tipus)]
@@ -77,13 +77,28 @@ infereix ctx (Var a) n = case lookup a ctx of
                       Just t1 -> Right (t1, [], (n+1))
                       Nothing -> Right (t, [], n)
 
-infereix ctx (Lam s e) n = do
-  t_s <- Right (TVar ("t"++ show n ))                     -- Tipus de variable de lambda (b)
-  (t1, s1, n1) <- infereix ((s,t_s):ctx) e (n+1)          -- Tipus del cos de lambda (c)
+infereix ctx (Lam "True" e) n = infereix ctx (Lam "False" e) n
+infereix ctx (Lam "False" e) n = do
+  t_s <- Right (TBool)                                    -- Tipus de variable de lambda (b)
+  (t1, s1, n1) <- infereix ctx e n                        -- Tipus del cos de lambda (c)
   t_retorn <- Right (aplicaSubst s1 (TFun t_s t1))        -- a = b -> c
   return (t_retorn, s1, n1)
-        
-        
+
+infereix ctx (Lam s e) n = do
+  case all isDigit s of
+    True -> (do  
+      t_s <- Right (TInt)                                     -- Tipus de variable de lambda (b)
+      (t1, s1, n1) <- infereix ctx e n                        -- Tipus del cos de lambda (c)
+      t_retorn <- Right (aplicaSubst s1 (TFun t_s t1))        -- a = b -> c
+      return (t_retorn, s1, n1)
+      )
+    False -> (do  
+      t_s <- Right (TVar ("t"++ show n ))                     -- Tipus de variable de lambda (b)
+      (t1, s1, n1) <- infereix ((s,t_s):ctx) e (n+1)          -- Tipus del cos de lambda (c)
+      t_retorn <- Right (aplicaSubst s1 (TFun t_s t1))        -- a = b -> c
+      return (t_retorn, s1, n1)
+      )
+
 infereix ctx (App e1 e2) n = do
   (t1, s1, n1) <- infereix ctx e1 n                       -- Tipus del cos de l'aplicació (b)
   (t2, s2, n2) <- infereix (aplicaSubstCtx s1 ctx) e2 n1  -- Tipus del cos de lambda (c)

@@ -1,33 +1,30 @@
-bhct> 
 bhct> Bool
 bhct> a2 -> a2
 bhct> Int
 bhct> a2 -> a2
 bhct> 
-bhct> 
-bhct> (a1 -> b1) -> a1 -> c1
+bhct> a1 -> Bool
 bhct> a1 -> c1
 bhct> Int -> Int
 bhct> Int -> Bool
 bhct> 
-bhct> 
 bhct> (t4 -> t4) -> t4 -> t4
 bhct> Int -> Int
-bhct> Error:
-(\f x -> f (f x)) not
-                  ^--- El parser ha parat aquí
-bhct> 
+bhct> Bool -> Bool
 bhct> 
 bhct> Int -> Bool
 bhct> Int -> Int -> Bool
 bhct> 
-bhct> 
 bhct> Int -> Bool
 bhct> (Bool -> t5) -> Int -> t5
-bhct> 
 bhct> 
 bhct> No es pot unificar un enter amb un booleà
 bhct> No es pot unificar un booleà amb un enter
 bhct> t3
 bhct> No es pot unificar un booleà amb un enter
+bhct> 
+bhct> 
+bhct> Int -> Bool
+bhct> Bool -> Int
+bhct> Int -> Int
 bhct> 
