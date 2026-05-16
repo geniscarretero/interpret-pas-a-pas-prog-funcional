@@ -1,0 +1,56 @@
+\babel@toc {catalan}{}\relax 
+\contentsline {part}{I\hspace {1em}Gestió del Projecte (GEP)}{3}{part.1}%
+\contentsline {section}{\numberline {0.1}Introducció}{4}{section.0.1}%
+\contentsline {section}{\numberline {0.2}Contextualització del Projecte}{4}{section.0.2}%
+\contentsline {subsection}{\numberline {0.2.1}Marc del projecte i contextualització a la FIB}{4}{subsection.0.2.1}%
+\contentsline {subsection}{\numberline {0.2.2}Definició de termes i conceptes clau}{5}{subsection.0.2.2}%
+\contentsline {subsection}{\numberline {0.2.3}Identificació del problema a resoldre}{6}{subsection.0.2.3}%
+\contentsline {subsection}{\numberline {0.2.4}Actors implicats i beneficiaris}{6}{subsection.0.2.4}%
+\contentsline {subsection}{\numberline {0.2.5}Estat de l'art i alternatives existents}{7}{subsection.0.2.5}%
+\contentsline {subsection}{\numberline {0.2.6}Justificació del projecte i valor afegit}{8}{subsection.0.2.6}%
+\contentsline {section}{\numberline {0.3}Abast i Objectius del Projecte}{9}{section.0.3}%
+\contentsline {subsection}{\numberline {0.3.1}Objectiu General}{10}{subsection.0.3.1}%
+\contentsline {subsection}{\numberline {0.3.2}Objectius Específics}{10}{subsection.0.3.2}%
+\contentsline {subsection}{\numberline {0.3.3}Límits del sistema i elements fora de l'abast}{10}{subsection.0.3.3}%
+\contentsline {subsection}{\numberline {0.3.4}Requeriments Tècnics i Funcionals}{11}{subsection.0.3.4}%
+\contentsline {subsection}{\numberline {0.3.5}Identificació de Riscos i Plans de Mitigació}{12}{subsection.0.3.5}%
+\contentsline {section}{\numberline {0.4}Metodologia i Rigor de Desenvolupament}{13}{section.0.4}%
+\contentsline {section}{\numberline {0.5}Planificació Temporal}{15}{section.0.5}%
+\contentsline {subsection}{\numberline {0.5.1}Gestió del Calendari i Distribució d'Hores}{15}{subsection.0.5.1}%
+\contentsline {subsection}{\numberline {0.5.2}Descripció Detallada de les Tasques, Precedències i Rols}{15}{subsection.0.5.2}%
+\contentsline {subsection}{\numberline {0.5.3}Recursos Humans i Materials}{16}{subsection.0.5.3}%
+\contentsline {subsection}{\numberline {0.5.4}Diagrama de Gantt}{16}{subsection.0.5.4}%
+\contentsline {section}{\numberline {0.6}Pressupost i Sostenibilitat}{18}{section.0.6}%
+\contentsline {subsection}{\numberline {0.6.1}Identificació i Justificació de Costos}{18}{subsection.0.6.1}%
+\contentsline {subsubsection}{Costos Directes de Personal per Tasca}{18}{subsection.0.6.1}%
+\contentsline {subsubsection}{Costos Generals i Amortitzacions}{19}{table.caption.4}%
+\contentsline {subsubsection}{Estimació del Pressupost Total}{19}{table.caption.4}%
+\contentsline {subsection}{\numberline {0.6.2}Control de Gestió de Desviacions}{19}{subsection.0.6.2}%
+\contentsline {subsection}{\numberline {0.6.3}Informe de Sostenibilitat}{20}{subsection.0.6.3}%
+\contentsline {part}{II\hspace {1em}Desenvolupament Tècnic}{21}{part.2}%
+\contentsline {chapter}{\numberline {1}Anàlisi Lèxica i Sintàctica}{22}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Disseny de la gramàtica}{22}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Implementació del Parser}{23}{section.1.2}%
+\contentsline {subsection}{\numberline {1.2.1}Combinadors de Parsers}{23}{subsection.1.2.1}%
+\contentsline {subsection}{\numberline {1.2.2}Gestió de Precedència i Associativitat}{24}{subsection.1.2.2}%
+\contentsline {subsubsection}{Aplicació de Funcions i Currificació}{24}{subsection.1.2.2}%
+\contentsline {chapter}{\numberline {2}Sistema de Tipus}{26}{chapter.2}%
+\contentsline {section}{\numberline {2.1}L'algorisme de Hindley-Milner}{26}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Unificació i Inferència}{26}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Variables de tipus fresques}{26}{subsection.2.2.1}%
+\contentsline {section}{\numberline {2.3}Polimorfisme i Contextos}{26}{section.2.3}%
+\contentsline {chapter}{\numberline {3}Avaluació i Reducció de Grafs}{27}{chapter.3}%
+\contentsline {section}{\numberline {3.1}De l'AST al Graf}{27}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Estructura del Heap i Adreçament}{27}{subsection.3.1.1}%
+\contentsline {section}{\numberline {3.2}Lambda Lifting i Supercombinadors}{27}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Extracció de variables lliures}{27}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Generació de funcions globals}{27}{subsection.3.2.2}%
+\contentsline {section}{\numberline {3.3}Estratègia de Reducció (Lazy Evaluation)}{27}{section.3.3}%
+\contentsline {chapter}{\numberline {4}Resultats i Proves}{28}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Bateria de Tests d'Inferència}{28}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Execució de Supercombinadors}{28}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Limitacions actuals}{28}{section.4.3}%
+\contentsline {chapter}{\numberline {5}Conclusions}{29}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Objectius assolits}{29}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Aprenentatges personals}{29}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Treball futur}{29}{section.5.3}%

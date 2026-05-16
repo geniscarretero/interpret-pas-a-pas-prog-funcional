@@ -1,6 +1,7 @@
 module HSInferenciaTipus where
 
 import HSTipus
+import HSFuncs
 import Data.Char (isDigit)
 
 -- Context és [(nom_variable, tipus)]
@@ -39,24 +40,7 @@ generaSubst (TVar s) t = Right [(s, t)]
 generaSubst _ _ =  Right []
 
 envInicial :: Context
-envInicial = [  ("+", TFun TInt (TFun TInt TInt)),
-                ("-", TFun TInt (TFun TInt TInt)),
-                ("/", TFun TInt (TFun TInt TInt)),
-                ("*", TFun TInt (TFun TInt TInt)),
-                ("<", TFun TInt (TFun TInt TBool)),
-                (">", TFun TInt (TFun TInt TBool)),
-                ("<=", TFun TInt (TFun TInt TBool)),
-                (">=", TFun TInt (TFun TInt TBool)),
-                ("==", TFun TInt (TFun TInt TBool)),
-                ("&&", TFun TBool (TFun TBool TBool)),
-                ("||", TFun TBool (TFun TBool TBool)),
-                ("True", TBool),
-                ("False", TBool),
-                ("not", TFun TBool TBool),
-                ("id", TFun (TVar "a") (TVar "a")),
-                ("const", TFun (TVar "a") (TFun (TVar "b") (TVar "a"))),
-                (".", TFun (TFun (TVar "b") (TVar "c")) (TFun (TFun (TVar "a") (TVar "b")) (TFun (TVar "a") (TVar "c"))))
-                ]
+envInicial = funcionsPredefinides ++ [("True", TBool), ("False", TBool)]
 
 renameTVar :: Tipus -> Int -> Maybe Tipus
 renameTVar (TFun t1 t2) n = do 

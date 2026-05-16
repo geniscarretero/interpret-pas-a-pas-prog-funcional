@@ -1,0 +1,95 @@
+\documentclass[12pt,a4paper]{report}
+
+\usepackage[utf8]{inputenc}
+\usepackage[catalan]{babel}
+\usepackage{csquotes}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage[a4paper,margin=1in]{geometry}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em} % Afegeix espai entre paràgrafs per facilitar la lectura
+\usepackage{setspace}
+\onehalfspacing
+
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{listings}
+\usepackage{longtable}
+\usepackage{eurosym}
+\usepackage[authoryear]{natbib}
+\usepackage{xcolor}
+\usepackage{pgfgantt}
+\usepackage{forest}
+
+% Configuració per a fragments de codi Haskell
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{haskellstyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    language=Haskell
+}
+
+\begin{document}
+
+% --- PORTADA ---
+\begin{titlepage}
+    \centering
+    \vspace*{1cm}
+    % \includegraphics[width=0.8\textwidth]{logo-uni.png} % Descomentar quan tinguis el fitxer
+    \vspace{1.5cm}
+    {\scshape\Large Facultat d'Informàtica de Barcelona \par}
+    \vspace{1cm}
+    {\scshape\Large Treball de Final de Grau \par}
+    \vspace{1.5cm}
+    {\huge\bfseries Intèrpret Pas a Pas per a Programació Funcional \par}
+    \vspace{2cm}
+    {\Large\itshape Genís Carretero Ferrete\par}
+    \vfill
+    \begin{tabular}{ll}
+        \textbf{Director:} & Gerard Escudero Bakx \\
+        \textbf{Titulació:} & Grau en Enginyeria Informàtica (Computació) \\
+        \textbf{Data:} & Maig 2024
+    \end{tabular}
+\end{titlepage}
+
+%  INDEX
+\setlength{\parskip}{0em} % Afegeix espai entre paràgrafs per facilitar la lectura
+\tableofcontents
+\setlength{\parskip}{1em} % Afegeix espai entre paràgrafs per facilitar la lectura
+
+\newpage
+
+\include{capitols/GEP}
+
+\part{Desenvolupament Tècnic}
+
+\include{capitols/parser}
+\include{capitols/tipus}
+\include{capitols/avaluacio}
+\include{capitols/resultats}
+\include{capitols/conclusions}
+
+\end{document}

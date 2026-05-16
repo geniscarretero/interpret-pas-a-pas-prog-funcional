@@ -1,0 +1,109 @@
+\chapter{Anàlisi Lèxica i Sintàctica}
+L'anàlisi d'un programa font es divideix tradicionalment en dues fases: l'anàlisi lèxica i l'anàlisi sintàctica. Aquest intèrpret s'allunya d'eines externes generadores de codi com \textit{Happy} o \textit{Alex} i opta per un enfocament natiu basat en \textbf{combinadors de parsers} encastats directament al llenguatge de programació (Haskell). Això permet mantenir l'homogeneïtat del codi i simplifica el disseny.
+
+Per tal d'il·lustrar de manera didàctica el funcionament intern de l'intèrpret, aquesta memòria utilitzarà una \textbf{expressió guia} que ens acompanyarà al llarg de tots els capítols. Veurem el "viatge" complet d'aquesta expressió, des que és text pla fins que s'avalua. L'expressió triada és:
+
+\begin{center}
+    \texttt{(\textbackslash x y -> x * y) 2 3}
+\end{center}
+
+En aquest primer capítol, veurem com aquesta cadena de text es transforma en una estructura de dades comprensible per a la màquina.
+
+\section{Disseny de la gramàtica}
+L'objectiu principal és construir una representació abstracta en forma d'arbre (AST, \textit{Abstract Syntax Tree}) de qualsevol expressió introduïda per l'usuari. La gramàtica suportada s'ha dissenyat inspirant-se fortament en un subconjunt fonamental del llenguatge Haskell i del Càlcul Lambda clàssic, seguint el model exposat per \cite{peyton1987implementation}.
+
+La nostra expressió guia conté gairebé tots els elements essencials que el sistema reconeix:
+\begin{itemize}
+    \item \textbf{Càlcul Lambda:} Definicions anònimes de funcions mitjançant la sintaxi convencional (\texttt{\textbackslash x y -> ...}).
+    \item \textbf{Valors i Variables:} Nombres enters com el \texttt{2} i el \texttt{3}, i variables com la \texttt{x} i la \texttt{y}.
+    \item \textbf{Operadors Aritmètics:} Multiplicació (\texttt{*}), a més de suportar addició (\texttt{+}), substracció (\texttt{-}) i divisió (\texttt{/}).
+    \item \textbf{Aplicació de Funcions:} L'acció de passar el \texttt{2} i el \texttt{3} a la funció, establerta simplement per juxtaposició (espais entre elements).
+\end{itemize}
+A més d'aquests, el sistema també reconeix operadors relacionals (\texttt{<}, \texttt{==}, etc.) i lògics (\texttt{||}, \texttt{\&\&}), així com l'ignoratge de comentaris.
+
+\section{Implementació del Parser}
+
+\subsection{Combinadors de Parsers}
+Un parser en Haskell pot entendre's com una funció que pren una cadena de text, intenta consumir-ne un fragment, i retorna una llista de parells amb el valor analitzat i la part restant de la cadena.
+
+\begin{lstlisting}[style=haskellstyle, caption=Definició monàdica del tipus Parser]
+newtype Parser a = Parser {parse :: String -> [(a, String)]}
+\end{lstlisting}
+
+Aquesta representació adquireix la seva màxima potència quan s'instancien les classes de tipus \texttt{Functor}, \texttt{Applicative}, \texttt{Monad} i \texttt{Alternative}. Aquesta arquitectura permet encadenar petits parsers lèxics (com \texttt{sat}, \texttt{digit} o \texttt{lletra}) per formar patrons més complexos. Un exemple clar és la combinació monàdica per analitzar una seqüència repetida mitjançant l'operador d'alternança \texttt{<|>}:
+
+\begin{lstlisting}[style=haskellstyle, caption=Combinadors de repetició mul i mes]
+mul :: Parser a -> Parser [a]
+mul p = do
+  x  <- p
+  xs <- mul p
+  return (x : xs)
+  <|> return []
+
+mes :: Parser a -> Parser [a]
+mes p = do x <- p; xs <- mul p; return (x : xs)
+\end{lstlisting}
+
+Gràcies a aquesta construcció \textit{bottom-up}, les diferents parts de la nostra expressió (com el \texttt{token} del parèntesi o l'anàlisi dels enters \texttt{2} i \texttt{3}) es resolen amb una concisió extrema i tolerant espais en blanc.
+
+\subsection{Gestió de Precedència i Associativitat}
+El repte més complex de l'anàlisi sintàctica rau en l'ambigüitat natural del llenguatge funcional. Calia dissenyar un parser que atorgués l'associativitat i prioritat correcta a les operacions, convertint la seqüència lineal en un arbre estructurat.
+
+Per garantir la correcta \textbf{precedència d'operadors}, s'ha organitzat l'anàlisi de forma jeràrquica, de menys a més precedència: lògics, relacionals, sumatoris, multiplicatius i, per sobre de tots, l'aplicació de funcions. Així, a l'expressió \texttt{x * y}, l'operador multiplicatiu s'avalua abans que qualsevol suma que hi pogués haver al voltant.
+
+\subsubsection{Aplicació de Funcions i Currificació}
+El concepte més crític de la nostra gramàtica és l'aplicació de funcions. En programació funcional, l'aplicació és \textbf{associativa per l'esquerra}. La decisió de dissenyar el parser amb aquesta propietat no és arbitrària, sinó que és l'encarnació sintàctica de la \textbf{currificació} (\textit{currying}).
+
+En el nostre llenguatge, l'expressió guia \texttt{(\textbackslash x y -> x * y) 2 3} no està passant dos arguments simultanis a una funció. El parser ho agrupa implicitament com a \texttt{((\textbackslash x y -> x * y) 2) 3}. Primer s'aplica el \texttt{2}, retornant una nova funció que accepta la \texttt{y}, i finalment se li aplica el \texttt{3}. S'ha resolt de manera eficient extraient el primer àtom i aplicant una reducció per l'esquerra a la resta d'arguments:
+
+\begin{lstlisting}[style=haskellstyle, caption=Associativitat esquerra per a l'aplicació]
+ap :: Parser Expr
+ap = do
+    x <- atom
+    ys <- mul atom
+    return (insert (x:ys))
+        where
+            insert :: [Expr] -> Expr
+            insert [e] = e
+            insert exprs = (App (insert (init exprs)) (last exprs))
+\end{lstlisting}
+
+Un cop el parser ha processat completament la nostra cadena de text, genera el següent Arbre de Sintaxi Abstracta (AST), que és l'objectiu final d'aquest capítol i el punt de partida per a la inferència de tipus:
+
+Un cop el parser ha processat completament la nostra cadena de text, genera l'Arbre de Sintaxi Abstracta (AST). Com es pot observar a la Figura \ref{fig:ast_or}, la currificació es fa evident en veure com les aplicacions (\texttt{App}) s'apilen associant-se cap a l'esquerra:
+
+\begin{figure}[h]
+    \centering
+    \begin{forest}
+      for tree={
+        font=\ttfamily, % Lletra de codi
+        draw,           % Dibuixa un requadre al voltant del node
+        rounded corners,% Requadres arrodonits
+        align=center,   % Centra el text dins del node
+        edge={->},      % Fletxes en lloc de línies simples
+        s sep=10mm,     % Espaiat horitzontal entre germans
+        l sep=8mm       % Espaiat vertical entre nivells
+      }
+      [App
+        [App
+          [Lam
+            ["x"]
+            [Lam 
+              ["y"]
+              [App
+                [App
+                  [Var "*"]
+                  [Var "x"]
+                ]
+                [Var "y"]
+              ]
+            ]
+          ]
+          [Val 2]
+        ]
+        [Val 3]
+      ]
+    \end{forest}
+    \caption{Arbre de Sintaxi Abstracta (AST) per a l'expressió \texttt{(\textbackslash x y -> x * y) 2 3}}
+    \label{fig:ast_or}
+\end{figure}
