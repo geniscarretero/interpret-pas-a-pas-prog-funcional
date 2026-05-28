@@ -1,7 +1,6 @@
 module HSInferenciaTipus where
 
 import HSTipus
-import HSFuncs
 import Data.Char (isDigit)
 
 -- Context és [(nom_variable, tipus)]

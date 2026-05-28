@@ -36,7 +36,8 @@ output (Just input) m = (do
           Eval -> (do
             let (a, hs) = ast2graph res (0, IM.empty) []  
             let b = isWHNF (a,hs)
-            return ((show (a,hs)) ++ "\n" ++ (show b))
+            let (a1,hs1) = debugEvalLoop (a,hs)  10
+            return (showGraph (a1,hs1))
             )
         )
     [(res, rest)] -> (do 

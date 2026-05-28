@@ -1,0 +1,58 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[catalan]{babel}
+\usepackage{geometry}
+\geometry{margin=1in}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\begin{document}
+
+\begin{center}
+    \LARGE \textbf{INFORME DE SEGUIMENT DEL TREBALL DE FI DE GRAU} \\[0.4cm]
+    \large 20 de maig de 2026
+\end{center}
+
+\vspace{0.5cm}
+
+\noindent \textbf{Títol del projecte:} Implementació d'un intèrpret pas a pas per a la programació funcional \\
+\noindent \textbf{Estudiant:} Genís Carretero Ferrete\\
+\noindent \textbf{Titulació:} Grau en Enginyeria Informàtica (FIB - UPC)
+
+\vspace{0.4cm}
+\hrule
+\vspace{0.5cm}
+
+\section{Contextualització del projecte}
+El projecte s'emmarca en l'àrea dels llenguatges de programació i la computació, concretament en el desenvolupament d'un intèrpret educatiu basat en un subconjunt de Haskell i el Càlcul Lambda. Actualment, la majoria d'intèrprets (com GHCi) actuen com a "caixes negres" que només mostren el resultat final de l'avaluació, fet que suposa una barrera d'aprenentatge important per als estudiants de programació funcional a l'hora d'entendre conceptes com la reducció de grafs, la \textit{Weak Head Normal Form} (WHNF) o la inferència de tipus. 
+
+No existeixen al mercat gaires eure eines nates orientades exclusivament a la visualització pas a pas del cicle de vida complet d'una expression funcional. L'ús de \textbf{Haskell} com a tecnologia principal es justifica pel fet de ser el paradigma funcional pur per excel·lència, proporcionant un sistema de tipat fort i un patró de coincidència (\textit{pattern matching}) òptims per a la manipulació d'Arbres de Sintaxi Abstracta (AST) de forma rigorosa i formal.
+
+\section{Planificació}
+El projecte es troba actualment en un punto madur i segons el calendari global previst, situant-se de ple en la fase d'\textbf{Implementació de la Reducció de Grafs}. L'etapa d'anàlisi lèxica i sintàctica (front-end) s'ha completat amb èxit, així com el disseny estructural del sistema de tipus. 
+
+Respecte a la planificació inicial del GEP, s'ha hagut de realitzar un reajustament metodològic en l'arquitectura de dades interna: per modelar el \textit{Heap} de memòria en el paradigma pur de Haskell de manera clara i didàctica, s'ha optat per fer servir l'estructura \texttt{IntMap} on cada node té assignat un identificador enter explícit, gestionant manualment el flux del següent enter lliure. Tot i que aquesta decisió de disseny ha requerit una setmana addicional de maduració conceptual per gestionar la transferència de paràmetres, el canvi està completament justificat: simplificarà enormement la pròxima fase de renderitzat gràfic de l'estat del graf. Per tant, l'impacte en la planificació definitiva és neutre, no altera els objectius finals ni suposa cap increment de costos temporals o de recursos.
+
+\section{Metodologia i rigor}
+No s'ha produït cap canvi significatiu en la metodologia general de treball iteratiu proposada inicialment. Es manté l'enfocament de desenvolupament incremental, validant la correcció de cada combinador sintàctic i cada regla de reducció mitjançant bateries de proves controlades sobre expressions guia abans de procedir al següent bloc funcional. El rigor formal queda garantit per la pròpia naturalesa del llenguatge escollit i el trasllat estricte de la teoria dels sistemes de reducció clàssics al codi de l'aplicació.
+
+\section{Anàlisi d'alternatives}
+Durant el transcurs del projecte s'han analitzat diverses alternatives crítiques:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Generació del Parser:} Es va avaluar l'ús d'eines clàssiques de generació automàtica de codi (\textit{Happy} i \textit{Alex}). Es va descartar en favor de la implementació manual mitjançant \textbf{combinadors de parsers monàdics}. Aquesta alternativa és molt més enriquidora a nivell didàctic per a la memòria, ofereix una traçabilitat total dels errors sintàctics i manté la base del codi completament homogènia en Haskell.
+    \item \textbf{Representació del Heap:} Es va analitzar la utilització de referències mutables internes complexes (com \texttt{IORef} o \texttt{STRef}) per emular els punters de la memòria gràfica. Es va desestimar i es va adoptar la solució d'un mapat pur d'enters amb \texttt{IntMap}. Aquesta decisió es clau, ja que en ser una estructura pura i immutable a cada pas de reducció, permet extreure i "fotografiar" fàcilment l'estat de la memòria per mostrar-li-ho a l'usuari, complint millor l'objectiu docent del TFG.
+\end{itemize}
+
+\section{Integració de coneixements}
+El TFG aconsegueix una integració multidisciplinar notable de diverses matèries del grau: \textbf{Teoria de la Computació} (semàntica operacional, Càlcul Lambda, gramàtiques i autòmats), \textbf{Compiladors i Processadors de Llenguatges} (arquitectura d'un intèrpret, anàlisi sintàctica), \textbf{Estructures de Dades i Algorísmia} (optimització de grafs a memòria, mapes) i \textbf{Enginyeria del Programari} (modularitat, disseny net i robust). La creativitat de la solució rau en el fet de girar el focus cap a l'explicació gràfica del procés d'avaluació interna de la CPU.
+
+\section{Identificació de lleis i regulacions}
+Al tractar-se d'un programari de caràcter estrictament educatiu, local i de codi obert que no emmagatzema, processa ni transmet cap mena de dada personal de tercers, el projecte no es veu afectat per normatives de privacitat severes com el RGPD. El marc legal aplicable es restringeix a la \textbf{Llei de Propietat Intel·lectual} pel que fa a l'autoria del codi i al respecte de les llicències \textit{Open Source} (MIT/BSD) de les dependències de Haskell utilitzades. Compleix rigorosament amb la normativa vigent de Treballs de Fi de Grau de la facultat.
+
+\section{Implicació i presa de decisions (Actitud de l'estudiant)}
+L'estudiant ha demostrat un comportament professional, ètic i constant durant tot el quadrimestre. S'han realitzat de manera proactiva dues reunions presencials de vital importància amb el director del projecte (la primera, prèvia al disseny del sistema d'algorismes de tipus, i la segona, abans de començar a programar el motor d'avaluació). El seguiment s'ha complementat de manera contínua mitjançant intercanvis d'e-mails altament assertius, servint per validar el rumb de l'arquitectura i respondre dubtes de forma àgil.
+
+\section{Iniciativa i presa de decisions (Actitud de l'estudiant)}
+Davant dels obstacles tecnològics complexos plantejats pel paradigma funcional pur, l'estudiant ha mantingut una actitud clarament proactiva. Es va haver d'afrontar una forta corba d'aprenentatge inicial per dominar i estructurar els parsers monàdics de forma correcta, la qual cosa es va superar amb èxit convertint posteriorment el procés de combinació de símbols en un disseny divertit i fluid. La decisió de resoldre la propagació de l'entorn de tipus i de memòria passant-los de manera explícita com a paràmetres de les funcions —tot i resultar una pràctica inicialment inusual o exigent en Haskell— s'ha resolt i justificat amb maduresa, demostrant autonomia i determinació per tirar el programari endavant.
+
+\end{document}

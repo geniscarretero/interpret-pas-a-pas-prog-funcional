@@ -4,11 +4,12 @@ version:            0.1.0.0
 
 executable bhct
     main-is:          BHCt.hs
-    other-modules:    HSParser, HSTipus, HSInferenciaTipus, HSEval, HSFuncs
+    other-modules:    HSParser, HSTipus, HSInferenciaTipus, HSEval, HSDef
     build-depends:    
         base >= 4.7 && < 5,
         haskeline >= 0.8,
-        containers
+        containers,
+        unordered-containers
     hs-source-dirs:   .
 
     default-language: Haskell2010

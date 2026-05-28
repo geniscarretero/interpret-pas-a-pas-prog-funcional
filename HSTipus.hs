@@ -1,5 +1,6 @@
 module HSTipus where
 import qualified Data.IntMap as IM
+import qualified Data.HashMap.Strict as HM
 
 data Expr = Val Int                 -- Un número (42)
           | Var String              -- Una variable (x, y, suma, not, +, *)
@@ -7,21 +8,23 @@ data Expr = Val Int                 -- Un número (42)
           | Lam String Expr       -- Funció lambda (\x -> x + 1)
           deriving (Show)
 
--- Addr són els IDs dels nodes
-type Addr = Int
+type TypeEnv = HM.HashMap String Tipus
 
--- Heap és un graf dirigit, pot no ser connex
--- Com és un IntMap, necessita un addr per saber l'arrel (on comença el graf)
-type Heap = IM.IntMap Node
+funcionsPredefinides = [  ("+", TFun TInt (TFun TInt TInt)),
+                ("-", TFun TInt (TFun TInt TInt)),
+                ("/", TFun TInt (TFun TInt TInt)),
+                ("*", TFun TInt (TFun TInt TInt)),
+                ("<", TFun TInt (TFun TInt TBool)),
+                (">", TFun TInt (TFun TInt TBool)),
+                ("<=", TFun TInt (TFun TInt TBool)),
+                (">=", TFun TInt (TFun TInt TBool)),
+                ("==", TFun TInt (TFun TInt TBool)),
+                ("&&", TFun TBool (TFun TBool TBool)),
+                ("||", TFun TBool (TFun TBool TBool))]
+ 
 
--- HeapState té la següent adreça disponible per afegir nodes i el graf total
-type HeapState = (Addr, Heap)
-
-data Node = NVal Int                -- Int = valor
-          | NVar String
-          | NApp Addr Addr          -- Int = Addr
-          | NLam String Addr        -- Int = Addr
-          deriving (Show)
+preludeTypeEnv :: TypeEnv 
+preludeTypeEnv = HM.fromList funcionsPredefinides
 
 data Tipus = TInt
            | TBool
