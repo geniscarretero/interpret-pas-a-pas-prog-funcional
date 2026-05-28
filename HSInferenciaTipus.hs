@@ -93,3 +93,17 @@ infereix ctx (App e1 e2) n = do
   
 
   return ((aplicaSubst s3 t3), (s1++s2++s3), (n2+1))      -- Retorna el tipus de l'aplicació ja substituit
+
+infereix ctx (If e1 e2 e3) n = do
+  (t1, s1, n1) <- infereix ctx e1 n
+  sCond <- generaSubst t1 TBool
+  let sAcc1 = s1 ++ sCond
+
+  (t2 ,s2, n2) <- infereix (aplicaSubstCtx sAcc1 ctx) e2 n1
+  let sAcc2 = sAcc1 ++ s2
+
+  (t3, s3, n3) <- infereix (aplicaSubstCtx sAcc2 ctx) e3 n2
+  sUnif <- generaSubst t3 t2
+  let sAcc3 = sAcc2 ++ s3 ++ sUnif 
+
+  return  (t2, sAcc3, n3)

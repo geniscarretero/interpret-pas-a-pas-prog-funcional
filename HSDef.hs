@@ -17,6 +17,7 @@ data Node = NVal Int                -- Int = valor
           | NVar String
           | NApp Addr Addr          -- Int = Addr
           | NLam Addr Addr        -- Int = Addr
+          | NIf Addr Addr Addr
           deriving (Show,Eq)
 
 -- 1. Un llistat de les teves primitives nuclears

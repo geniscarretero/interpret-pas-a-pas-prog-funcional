@@ -6,6 +6,7 @@ data Expr = Val Int                 -- Un número (42)
           | Var String              -- Una variable (x, y, suma, not, +, *)
           | App Expr Expr           -- Aplicació de funció (f x)
           | Lam String Expr       -- Funció lambda (\x -> x + 1)
+          | If Expr Expr Expr
           deriving (Show)
 
 type TypeEnv = HM.HashMap String Tipus

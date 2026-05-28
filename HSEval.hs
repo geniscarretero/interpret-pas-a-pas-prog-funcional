@@ -28,6 +28,13 @@ ast2graph (Lam str e) (a, graph) strAddr =
   in
     (a, (a11, IM.insert a (NLam (a+1) a1) (IM.insert (a+1) (NVar str) hs1)))
 
+ast2graph  (If e1 e2 e3) (a, graph) strAddr =
+  let 
+    (a1, (aa1, hs1)) = ast2graph e1 (a+1, graph) strAddr
+    (a2, (aa2, hs2)) = ast2graph e2 (aa1, hs1) strAddr
+    (a3, (aa3, hs3)) = ast2graph e3 (aa2, hs2) strAddr
+  in (a, (aa3, (IM.insert a (NIf a1 a2 a3) hs3)))
+
 -- Comencem AVALUACIÓ
 -- Bucle
   -- isWHNF?
@@ -74,6 +81,7 @@ isWHNF (a, (aa,hp)) =
           True  -> if nApps >= nPars then False else True
           False -> False
       )
+    NIf _ _ _ -> False 
 
 -- Precondicions:
 -- les adreces ja ho tenen tot avaluat en 
@@ -232,6 +240,17 @@ pas (a, (aa,hp)) defEnv stk =
         )
     NVal _ -> Right (aa,hp) -- Hauria de petar
     NApp a1 a2 -> pas (a1, (aa,hp)) defEnv (a:stk)
+    NIf a1 a2 a3 -> if not (isWHNF (a1,(aa,hp)) ) 
+      then pas (a1, (aa, hp)) defEnv []
+      else case IM.lookup a1 hp of 
+        Just (NVar "True") ->( 
+          let Just contingut = IM.lookup a2 hp
+          in Right (aa, IM.insert a contingut (IM.delete a hp))
+          )
+        Just (NVar "False") ->( 
+          let Just contingut = IM.lookup a3 hp
+          in Right (aa, IM.insert a contingut (IM.delete a hp))
+          )
 
 debugEvalLoop :: (Addr,HeapState) -> Int -> Either String (Addr, HeapState)
 debugEvalLoop graph 0 = Right graph 

@@ -45,7 +45,7 @@ instance Alternative Parser where
   (<|>) = or'
 
 paraulesProhibides :: [String]
-paraulesProhibides = []
+paraulesProhibides = ["if", "then", "else"]
 
 result :: a -> Parser a
 result val = Parser $ \inp -> [(val, inp)]
@@ -142,9 +142,21 @@ compParser =  (token (stringMatch "<=") >> return "<=")
           <|> (token (sat (== '>'))     >> return ">" )
 
 expr :: Parser Expr
-expr = lam  <|> logicOr -- <|> ifThenElse
+expr = lam <|> ifThenElse <|> logicOr  
 
 -- Inici jerarquia 
+
+ifThenElse :: Parser Expr
+ifThenElse = do
+  token (stringMatch "if")
+  e1 <- token expr
+  token (stringMatch "then")
+  e2 <- token expr
+  token (stringMatch "else")
+  e3 <- token expr
+  return (If e1 e2 e3)
+  
+
 logicOr :: Parser Expr
 logicOr = do
     t1 <- logicAnd
