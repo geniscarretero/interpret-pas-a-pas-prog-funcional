@@ -165,7 +165,7 @@ compute Or [a1, a2] (aa,hp) =
 -- Int = quantes aplicacions s'han de treure?
 --  indica que, si s'ha fet una aplicació s'ha de canviar l'adreça per la nova que tha donat
 --  Es pot treure el bool de retorn, ho puc fer directament abans del backtrack
-pas :: (Addr, HeapState) -> DefEnv -> [Addr] -> HeapState
+pas :: (Addr, HeapState) -> DefEnv -> [Addr] -> Either String HeapState
 pas (a, (aa,hp)) defEnv stk =
   let Just n = IM.lookup a hp
   in case n of
@@ -184,7 +184,7 @@ pas (a, (aa,hp)) defEnv stk =
         --  a1 pel contingut d'a3
         newHp = IM.insert app1 brancaDretaLam (IM.delete app1 (IM.delete a (IM.insert a1 contingut (IM.delete a1 (IM.delete a3 hp))))) 
 
-      in (aa,newHp)
+      in Right (aa,newHp)
       ) 
     NVar s -> (
       case HM.lookup s defEnv of 
@@ -210,11 +210,12 @@ pas (a, (aa,hp)) defEnv stk =
                         -- Un cop creat el graph:
                         -- el que apuntava a app1 ha d'apuntar a aquest nou graph
                         Just contingut = IM.lookup addrNew hp1
-                        -- Per tant: eliminar app1 i fills: app2 i fills eliminar addrnew 
+                        -- Per tant: eliminar app1, app2 i addrnew
+                        -- No puc eliminar fills app1 i app2 pq no sé si es tornen a utilitzar (implementar gc en IM)
                         -- substituir app2 amb contingut nou
-                        newHp = IM.insert app2 contingut (IM.delete addrNew (IM.delete a (IM.delete p2 (IM.delete app2 (IM.delete p1 (IM.delete app1 hp1))))))
+                        newHp = IM.insert app2 contingut (IM.delete addrNew (IM.delete a (IM.delete app2 (IM.delete app1 hp1))))
                       in 
-                        (aa1,newHp) -- Pas fet
+                        Right (aa1,newHp) -- Pas fet
                     )
                   )
             )
@@ -224,19 +225,31 @@ pas (a, (aa,hp)) defEnv stk =
               (addr, (aa1, hp1)) = ast2graph expr (aa,hp) [] -- Substitueixo pel graph ja fet del supercombinador (pas fet)
               Just contingut = IM.lookup addr hp1
               --Eliminar nou node i substituir per el que ens apunta a nosaltress
-            in (aa1, (IM.insert a contingut (IM.delete a (IM.delete addr hp1))))
+            in Right(aa1, (IM.insert a contingut (IM.delete a (IM.delete addr hp1))))
             )
           )
+        Nothing -> Left "Variable no trobada" 
         )
-    NVal _ -> (aa,hp) -- Hauria de petar
+    NVal _ -> Right (aa,hp) -- Hauria de petar
     NApp a1 a2 -> pas (a1, (aa,hp)) defEnv (a:stk)
 
-debugEvalLoop :: (Addr,HeapState) -> Int -> (Addr, HeapState)
-debugEvalLoop graph 0 = graph 
-debugEvalLoop graph@(addr, _) n = 
-  if isWHNF graph then graph
+debugEvalLoop :: (Addr,HeapState) -> Int -> Either String (Addr, HeapState)
+debugEvalLoop graph 0 = Right graph 
+debugEvalLoop graph@(addr, _) (-1) =
+  if isWHNF graph then Right graph
     else
-      debugEvalLoop (addr, hs) (n-1) where hs = pas graph preludeDefEnv [] 
+      do 
+        next <- pas graph preludeDefEnv []
+        hs <- debugEvalLoop (addr, next) (-1) 
+        return hs
+
+debugEvalLoop graph@(addr, _) n = 
+  if isWHNF graph then Right graph
+    else
+      do
+        next <- pas graph preludeDefEnv []
+        hs <- debugEvalLoop (addr, next) (n-1) 
+        return hs
 
 showGraph :: (Addr, HeapState) -> String
 showGraph (a, hs@(aa,hp)) =

@@ -34,10 +34,15 @@ output (Just input) m = (do
               Right (t, _, _) -> return (showTipus t)
             )
           Eval -> (do
-            let (a, hs) = ast2graph res (0, IM.empty) []  
-            let b = isWHNF (a,hs)
-            let (a1,hs1) = debugEvalLoop (a,hs)  10
-            return (showGraph (a1,hs1))
+            case infereix envInicial res 1 of
+              Left text -> return text
+              Right _ -> (do
+                let (a, hs) = ast2graph res (0, IM.empty) []  
+            
+                case debugEvalLoop (a,hs)  (-1) of
+                  Left text -> return text
+                  Right (a1,hs1) -> return (showGraph (a1,hs1))
+                )
             )
         )
     [(res, rest)] -> (do 
