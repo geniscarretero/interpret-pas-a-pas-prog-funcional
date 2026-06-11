@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2026.5.14)  16 MAY 2026 12:17
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2026.5.14)  11 JUN 2026 20:08
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -703,6 +703,70 @@ Package: inlinedef 2008/07/10 v1.0 Inlined expansions within definitions
 \forest@copy@out=\write4
 \forest@externalize@max@outer@n=\count382
 \forest@externalize@inner@n=\count383
+) (/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2022/04/08 v2.17n AMS math features
+\@mathmargin=\skip61
+
+For additional information on amsmath, use the `?' option.
+(/usr/share/texlive/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2021/08/26 v2.01 AMS text
+ (/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks55
+\ex@=\dimen310
+)) (/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen311
+) (/usr/share/texlive/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 2022/04/08 v2.04 operator names
+)
+\inf@bad=\count384
+LaTeX Info: Redefining \frac on input line 234.
+\uproot@=\count385
+\leftroot@=\count386
+LaTeX Info: Redefining \overline on input line 399.
+LaTeX Info: Redefining \colon on input line 410.
+\classnum@=\count387
+\DOTSCASE@=\count388
+LaTeX Info: Redefining \ldots on input line 496.
+LaTeX Info: Redefining \dots on input line 499.
+LaTeX Info: Redefining \cdots on input line 620.
+\Mathstrutbox@=\box99
+\strutbox@=\box100
+LaTeX Info: Redefining \big on input line 722.
+LaTeX Info: Redefining \Big on input line 723.
+LaTeX Info: Redefining \bigg on input line 724.
+LaTeX Info: Redefining \Bigg on input line 725.
+\big@size=\dimen312
+LaTeX Font Info:    Redeclaring font encoding OML on input line 743.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 744.
+\macc@depth=\count389
+LaTeX Info: Redefining \bmod on input line 905.
+LaTeX Info: Redefining \pmod on input line 910.
+LaTeX Info: Redefining \smash on input line 940.
+LaTeX Info: Redefining \relbar on input line 970.
+LaTeX Info: Redefining \Relbar on input line 971.
+\c@MaxMatrixCols=\count390
+\dotsspace@=\muskip17
+\c@parentequation=\count391
+\dspbrk@lvl=\count392
+\tag@help=\toks56
+\row@=\count393
+\column@=\count394
+\maxfields@=\count395
+\andhelp@=\toks57
+\eqnshift@=\dimen313
+\alignsep@=\dimen314
+\tagshift@=\dimen315
+\tagwidth@=\dimen316
+\totwidth@=\dimen317
+\lineht@=\dimen318
+\@envbody=\toks58
+\multlinegap=\skip62
+\multlinetaggap=\skip63
+\mathdisplay@stack=\toks59
+LaTeX Info: Redefining \[ on input line 2953.
+LaTeX Info: Redefining \] on input line 2954.
 )
 Package csquotes Info: Checking for multilingual support...
 Package csquotes Info: ... found 'babel' package.
@@ -710,48 +774,54 @@ Package csquotes Info: Adjusting default style.
 
 
 Package csquotes Warning: No style for language 'catalan'.
-(csquotes)                Using fallback style on input line 55.
+(csquotes)                Using fallback style on input line 67.
 
 Package csquotes Info: Redefining alias 'default' -> 'fallback'.
 (./memoria_tfg.aux (./capitols/GEP.aux) (./capitols/parser.aux) (./capitols/tipus.aux) (./capitols/avaluacio.aux) (./capitols/resultats.aux) (./capitols/conclusions.aux))
 \openout1 = `memoria_tfg.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Info: Redefining \l on input line 55.
-LaTeX Info: Redefining \L on input line 55.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 67.
+LaTeX Font Info:    ... okay on input line 67.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 67.
+LaTeX Font Info:    ... okay on input line 67.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 67.
+LaTeX Font Info:    ... okay on input line 67.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 67.
+LaTeX Font Info:    ... okay on input line 67.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 67.
+LaTeX Font Info:    ... okay on input line 67.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 67.
+LaTeX Font Info:    ... okay on input line 67.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 67.
+LaTeX Font Info:    ... okay on input line 67.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 67.
+LaTeX Font Info:    ... okay on input line 67.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 67.
+LaTeX Font Info:    ... okay on input line 67.
+LaTeX Info: Redefining \l on input line 67.
+LaTeX Info: Redefining \L on input line 67.
  (/usr/share/texlive/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count384
-\scratchdimen=\dimen310
-\scratchbox=\box99
-\nofMPsegments=\count385
-\nofMParguments=\count386
-\everyMPshowfont=\toks55
-\MPscratchCnt=\count387
-\MPscratchDim=\dimen311
-\MPnumerator=\count388
-\makeMPintoPDFobject=\count389
-\everyMPtoPDFconversion=\toks56
+\scratchcounter=\count396
+\scratchdimen=\dimen319
+\scratchbox=\box101
+\nofMPsegments=\count397
+\nofMParguments=\count398
+\everyMPshowfont=\toks60
+\MPscratchCnt=\count399
+\MPscratchDim=\dimen320
+\MPnumerator=\count400
+\makeMPintoPDFobject=\count401
+\everyMPtoPDFconversion=\toks61
 ) (/usr/share/texlive/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
+ (/usr/share/texlive/texmf-dist/tex/latex/grfext/grfext.sty
+Package: grfext 2019/12/03 v1.3 Manage graphics extensions (HO)
+)
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
+Package grfext Info: Graphics extension search list:
+(grfext)             [.pdf,.png,.jpg,.mps,.jpeg,.jbig2,.jb2,.PDF,.PNG,.JPG,.JPEG,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 504.
  (/usr/share/texlive/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 ))
@@ -763,7 +833,7 @@ Package caption Info: longtable package is loaded.
 Package: ltcaption 2021/01/08 v1.4c longtable captions (AR)
 )
 Package caption Info: End \AtBeginDocument code.
-Package hyperref Info: Link coloring OFF on input line 55.
+Package hyperref Info: Link coloring OFF on input line 67.
  (./memoria_tfg.out) (./memoria_tfg.out)
 \@outlinefile=\write5
 \openout5 = `memoria_tfg.out'.
@@ -803,20 +873,14 @@ Package hyperref Info: Link coloring OFF on input line 55.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-\c@lstlisting=\count390
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <12> on input line 71.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 71.
-LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 71.
+\c@lstlisting=\count402
 [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] (./memoria_tfg.toc
 pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
 <to be read again> 
                    \relax 
-l.35 ...ia i Associativitat}{24}{subsection.1.2.2}
+l.35 ...rarquia Sintàctica}{24}{subsection.1.2.2}
                                                   % [1
 
 ])
@@ -1032,32 +1096,62 @@ File: lstlang1.sty 2023/02/27 1.9 listings language file
 File: lstlang2.sty 2023/02/27 1.9 listings language file
 )
 Package hyperref Info: bookmark level for unknown lstlisting defaults to 0 on input line 29.
- [23] [24]) [25]
+ [23]
+Overfull \hbox (10.7266pt too wide) in paragraph at lines 51--51
+|[]\OT1/cmr/bx/n/14.4 Gesti^^So de Pre-ced^^Rencia i As-so-ci-a-ti-vi-tat i Je-rar-quia Sint^^Ractica| 
+ []
+
+[24]
+
+Package natbib Warning: Citation `peyton1987implementation' on page 25 undefined on input line 62.
+
+[25]) [26]
 \openout2 = `capitols/tipus.aux'.
 
  (./capitols/tipus.tex
 Cap\'{\i }tol 2.
-) [26
+
+Package natbib Warning: Citation `peyton1987implementation' on page 27 undefined on input line 4.
+
+[27
 
 
 
 
 ]
+Overfull \hbox (28.02516pt too wide) in paragraph at lines 23--24
+[]\OT1/cmr/m/n/12 A la nos-tra im-ple-men-ta-ci^^So, aquest com-por-ta-ment es tro-ba en-cap-su-lat en la fun-ci^^So \OT1/cmtt/m/n/12 generaSubst\OT1/cmr/m/n/12 .
+ []
+
+[28]
+Overfull \hbox (6.93983pt too wide) in paragraph at lines 68--69
+\OT1/cmr/m/n/12 L'arquitectura fun-ci-o-nal de la de-duc-ci^^So es-truc-tu-ral s'im-ple-men-ta bi-fur-cant el patr^^So sint^^Ractic
+ []
+
+[29] [30] [31] [32]
+Overfull \hbox (31.17993pt too wide) in paragraph at lines 151--151
+|[]\OT1/cmr/bx/n/17.28 Polimorfisme Pa-ram^^Retric i Re-a-no-me-na-ment Din^^Ramic| 
+ []
+
+) [33]
 \openout2 = `capitols/avaluacio.aux'.
 
  (./capitols/avaluacio.tex
 Cap\'{\i }tol 3.
-) [27
+[34
 
 
 
 
 ]
+LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <12> not available
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 19.
+ [35] [36] [37] [38]) [39]
 \openout2 = `capitols/resultats.aux'.
 
  (./capitols/resultats.tex
 Cap\'{\i }tol 4.
-) [28
+) [40
 
 
 
@@ -1067,7 +1161,7 @@ Cap\'{\i }tol 4.
 
  (./capitols/conclusions.tex
 Cap\'{\i }tol 5.
-) [29
+) [41
 
 
 
@@ -1078,21 +1172,21 @@ Package natbib Warning: There were undefined citations.
 
 (./memoria_tfg.aux (./capitols/GEP.aux) (./capitols/parser.aux) (./capitols/tipus.aux) (./capitols/avaluacio.aux) (./capitols/resultats.aux) (./capitols/conclusions.aux))
 Package rerunfilecheck Info: File `memoria_tfg.out' has not changed.
-(rerunfilecheck)             Checksum: 982BC2DB21EAD137F9ED1C75CCA849C8;10778.
+(rerunfilecheck)             Checksum: E9B67BA56FC6725AE2CE9ACCEDB2D10D;12711.
  ) 
 Here is how much of TeX's memory you used:
- 39911 strings out of 476034
- 850736 string characters out of 5792864
- 1924388 words of memory out of 6000000
- 59697 multiletter control sequences out of 15000+600000
- 520359 words of font info for 60 fonts, out of 8000000 for 9000
+ 40886 strings out of 476034
+ 863909 string characters out of 5792864
+ 2014388 words of memory out of 6000000
+ 60520 multiletter control sequences out of 15000+600000
+ 521033 words of font info for 63 fonts, out of 8000000 for 9000
  1137 hyphenation exceptions out of 8191
- 167i,11n,150p,1659b,1925s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbxti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/eurosym/feybr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/eurosym/feymr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb>
-Output written on memoria_tfg.pdf (30 pages, 249147 bytes).
+ 167i,11n,150p,1679b,2125s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbxti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/eurosym/feybr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/eurosym/feymr10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb>
+Output written on memoria_tfg.pdf (42 pages, 322970 bytes).
 PDF statistics:
- 530 PDF objects out of 1000 (max. 8388607)
- 463 compressed objects within 5 object streams
- 114 named destinations out of 1000 (max. 500000)
- 421 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 759 PDF objects out of 1000 (max. 8388607)
+ 674 compressed objects within 7 object streams
+ 244 named destinations out of 1000 (max. 500000)
+ 461 words of extra memory for PDF output out of 10000 (max. 10000000)
 

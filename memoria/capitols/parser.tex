@@ -1,36 +1,38 @@
 \chapter{Anàlisi Lèxica i Sintàctica}
-L'anàlisi d'un programa font es divideix tradicionalment en dues fases: l'anàlisi lèxica i l'anàlisi sintàctica. Aquest intèrpret s'allunya d'eines externes generadores de codi com \textit{Happy} o \textit{Alex} i opta per un enfocament natiu basat en \textbf{combinadors de parsers} encastats directament al llenguatge de programació (Haskell). Això permet mantenir l'homogeneïtat del codi i simplifica el disseny.
+L'anàlisi d'un programa font es divideix tradicionalment en dues fases clarament diferenciades: l'anàlisi lèxica (\textit{lexing}) i l'anàlisi sintàctica (\textit{parsing}). En el disseny d'aquest intèrpret, s'ha optat per defugir l'ús d'eines externes generadores de codi com \textit{Alex} o \textit{Happy}. En el seu lloc, s'ha implementat un enfocament natiu basat en \textbf{combinadors de parsers} encastats directament en el llenguatge amfitrió, Haskell. Aquesta decisió de disseny permet mantenir l'homogeneïtat absoluta de la base de codi, aprofita el sistema de tipus de Haskell per garantir la seguretat en temps de compilació i simplifica dràsticament l'arquitectura de l'intèrpret.
 
-Per tal d'il·lustrar de manera didàctica el funcionament intern de l'intèrpret, aquesta memòria utilitzarà una \textbf{expressió guia} que ens acompanyarà al llarg de tots els capítols. Veurem el "viatge" complet d'aquesta expressió, des que és text pla fins que s'avalua. L'expressió triada és:
+Per tal d'il·lustrar de manera didàctica i cohesiva el funcionament intern del sistema, aquesta memòria utilitzarà una \textbf{expressió guia} que ens acompanyarà de manera transversal al llarg de tots els capítols. Analitzarem el ``viatge'' complet d'aquesta línia, des que és una simple cadena de text pla fins a la seva reducció final en la màquina de grafs. L'expressió triada és:
 
 \begin{center}
     \texttt{(\textbackslash x y -> x * y) 2 3}
 \end{center}
 
-En aquest primer capítol, veurem com aquesta cadena de text es transforma en una estructura de dades comprensible per a la màquina.
+En aquest capítol, s'exposa com aquesta seqüència de caràcters es transforma en una estructura dades arbòria que reflecteix la semàntica formal del llenguatge.
 
 \section{Disseny de la gramàtica}
-L'objectiu principal és construir una representació abstracta en forma d'arbre (AST, \textit{Abstract Syntax Tree}) de qualsevol expressió introduïda per l'usuari. La gramàtica suportada s'ha dissenyat inspirant-se fortament en un subconjunt fonamental del llenguatge Haskell i del Càlcul Lambda clàssic, seguint el model exposat per \cite{peyton1987implementation}.
+L'objectiu primer d'aquesta fase és construir una representació abstracta en forma d'arbre (AST, \textit{Abstract Syntax Tree}) de qualsevol expressió subministrada per l'usuari. La gramàtica suportada s'ha dissenyat imitant un subconjunt essencial del llenguatge Haskell i del Càlcul Lambda clàssic, prenent com a fonament teòric el model de transformació sintàctica exposat per Peyton Jones \cite{peyton1987implementation}.
 
-La nostra expressió guia conté gairebé tots els elements essencials que el sistema reconeix:
+Com es pot observar, l'expressió guia conté la pràctica totalitat dels elements sintàctics que el parser és capaç de reconèixer de manera nativa:
 \begin{itemize}
-    \item \textbf{Càlcul Lambda:} Definicions anònimes de funcions mitjançant la sintaxi convencional (\texttt{\textbackslash x y -> ...}).
-    \item \textbf{Valors i Variables:} Nombres enters com el \texttt{2} i el \texttt{3}, i variables com la \texttt{x} i la \texttt{y}.
-    \item \textbf{Operadors Aritmètics:} Multiplicació (\texttt{*}), a més de suportar addició (\texttt{+}), substracció (\texttt{-}) i divisió (\texttt{/}).
-    \item \textbf{Aplicació de Funcions:} L'acció de passar el \texttt{2} i el \texttt{3} a la funció, establerta simplement per juxtaposició (espais entre elements).
+    \item \textbf{Abstraccions Lambda Multiargument:} Definicions anònimes de funcions mitjançant la sintaxi \texttt{\textbackslash x y -> ...}. Com s'analitzarà més endavant, el parser s'encarrega de desugarejar aquesta construcció en abstraccions niuades d'un sol argument.
+    \item \textbf{Valors literals i Variables:} Identificadors numèrics enters (\texttt{2} i \texttt{3}) i variables alfanumèriques en minúscula (\texttt{x} i \texttt{y}).
+    \item \textbf{Operadors infixos:} Operacions aritmètiques primitives primàries, en aquest cas la multiplicació (\texttt{*}), a més de suportar addició (\texttt{+}), substracció (\texttt{-}) i divisió (\texttt{/}).
+    \item \textbf{Aplicació de funcions:} L'acció de passatge d'arguments (\texttt{2} i \texttt{3}) a l'abstracció, denotada simplement per la juxtaposició d'expressions (espais en blanc).
 \end{itemize}
-A més d'aquests, el sistema també reconeix operadors relacionals (\texttt{<}, \texttt{==}, etc.) i lògics (\texttt{||}, \texttt{\&\&}), així com l'ignoratge de comentaris.
+Més enllà dels elements presents a l'expressió guia, el disseny s'estén per donar suport a estructures de control condicionals (\texttt{if-then-else}), operadors de comparació relacionals (\texttt{<}, \texttt{<=}, \texttt{>}, \texttt{>=}, \texttt{==}) i lògics (\texttt{||}, \texttt{\&\&}), així com l'omissió sintàctica de comentaris unillínia (\texttt{--}).
 
 \section{Implementació del Parser}
 
-\subsection{Combinadors de Parsers}
-Un parser en Haskell pot entendre's com una funció que pren una cadena de text, intenta consumir-ne un fragment, i retorna una llista de parells amb el valor analitzat i la part restant de la cadena.
+\subsection{Combinadors de Parsers Monàdics}
+Seguint l'estratègia funcional clàssica, un parser s'estructura com una funció que rep una cadena de text (\texttt{String}) i en consumeix un prefix vàlid, retornant una llista de parells que contenen el valor semàntic extret i el fragment restant de la cadena sense analitzar. Una llista buida denota un error de parsatge. El tipus s'encapsula sota un nou tipus de dades monàdic:
 
 \begin{lstlisting}[style=haskellstyle, caption=Definició monàdica del tipus Parser]
 newtype Parser a = Parser {parse :: String -> [(a, String)]}
 \end{lstlisting}
 
-Aquesta representació adquireix la seva màxima potència quan s'instancien les classes de tipus \texttt{Functor}, \texttt{Applicative}, \texttt{Monad} i \texttt{Alternative}. Aquesta arquitectura permet encadenar petits parsers lèxics (com \texttt{sat}, \texttt{digit} o \texttt{lletra}) per formar patrons més complexos. Un exemple clar és la combinació monàdica per analitzar una seqüència repetida mitjançant l'operador d'alternança \texttt{<|>}:
+Aquesta abstracció expressa la seva màxima potència formal mitjançant la instanciació de les classes de tipus estructurals de Haskell: \texttt{Functor}, \texttt{Applicative} i \texttt{Monad}. La instanciació de \texttt{Monad} fa ús de llistes per compressió per modelar el no-determinisme i el flux de dades de manera elegant. Això permet que combinadors primitius de caràcters (com \texttt{sat}, \texttt{digit} o \texttt{lletra}) s'encadenin de manera seqüencial. 
+
+Per altra banda, la implementació de la classe \texttt{Alternative} mitjançant la funció d'elecció prioritzada \texttt{or'} (operador \texttt{<|>}) dota el sistema de capacitat de \textit{backtracking}. Això es fa evident en els combinadors de repetició \texttt{mul} (zero o més vegades) i \texttt{mes} (una o més vegades), que miren de consumir text recursivament i, en cas de fallida, reverteixen el consum oferint una alternativa buida:
 
 \begin{lstlisting}[style=haskellstyle, caption=Combinadors de repetició mul i mes]
 mul :: Parser a -> Parser [a]
@@ -44,19 +46,24 @@ mes :: Parser a -> Parser [a]
 mes p = do x <- p; xs <- mul p; return (x : xs)
 \end{lstlisting}
 
-Gràcies a aquesta construcció \textit{bottom-up}, les diferents parts de la nostra expressió (com el \texttt{token} del parèntesi o l'anàlisi dels enters \texttt{2} i \texttt{3}) es resolen amb una concisió extrema i tolerant espais en blanc.
+Gràcies a aquesta construcció \textit{bottom-up}, combinadors complexos com \texttt{intToken} (que absorbeix espais adjacents abans i després d'un dígit utilitzant el combinador \texttt{token}) es construeixen de manera altament declarativa.
 
-\subsection{Gestió de Precedència i Associativitat}
-El repte més complex de l'anàlisi sintàctica rau en l'ambigüitat natural del llenguatge funcional. Calia dissenyar un parser que atorgués l'associativitat i prioritat correcta a les operacions, convertint la seqüència lineal en un arbre estructurat.
+\subsection{Gestió de Precedència i Associativitat i Jerarquia Sintàctica}
+El repte de dissenyar una gramàtica per a expressions funcionals rau en l'ambigüitat inherent de les operacions infixes i les aplicacions juxtaposades. Per resoldre la \textbf{precedència d'operadors} sense recórrer a una taula de parsing externa, s'ha estructurat el parser com un descens sintàctic jeraquitzat reflectit en el flux de crides de les funcions.
 
-Per garantir la correcta \textbf{precedència d'operadors}, s'ha organitzat l'anàlisi de forma jeràrquica, de menys a més precedència: lògics, relacionals, sumatoris, multiplicatius i, per sobre de tots, l'aplicació de funcions. Així, a l'expressió \texttt{x * y}, l'operador multiplicatiu s'avalua abans que qualsevol suma que hi pogués haver al voltant.
+L'arrel de l'anàlisi és el combinador \texttt{expr}, el qual delega el control seguint un ordre estrictament creixent de precedència (de menys a més prioritat):
+\begin{center}
+\texttt{expr} $\rightarrow$ \texttt{lam} / \texttt{ifThenElse} $\rightarrow$ \texttt{logicOr} $\rightarrow$ \texttt{logicAnd} $\rightarrow$ \texttt{comp} $\rightarrow$ \texttt{suma} $\rightarrow$ \texttt{term} $\rightarrow$ \texttt{ap} $\rightarrow$ \texttt{atom}
+\end{center}
 
-\subsubsection{Aplicació de Funcions i Currificació}
-El concepte més crític de la nostra gramàtica és l'aplicació de funcions. En programació funcional, l'aplicació és \textbf{associativa per l'esquerra}. La decisió de dissenyar el parser amb aquesta propietat no és arbitrària, sinó que és l'encarnació sintàctica de la \textbf{currificació} (\textit{currying}).
+D'aquesta manera, l'operació multiplicativa \texttt{x * y} present en el cos de la nostra expressió guia és reconeguda pel combinador \texttt{term}, ramificant correctament l'AST abans que operacions de menor precedència com les sumes puguin capturar erròniament els operands. Així mateix, l'ús de la llista de \texttt{paraulesProhibides} prevé que els tokens estructurals de control (\texttt{if}, \texttt{then}, \texttt{else}) siguin erròniament absorbits com a simples identificadors lineals per part de \texttt{nomVariable}.
 
-En el nostre llenguatge, l'expressió guia \texttt{(\textbackslash x y -> x * y) 2 3} no està passant dos arguments simultanis a una funció. El parser ho agrupa implicitament com a \texttt{((\textbackslash x y -> x * y) 2) 3}. Primer s'aplica el \texttt{2}, retornant una nova funció que accepta la \texttt{y}, i finalment se li aplica el \texttt{3}. S'ha resolt de manera eficient extraient el primer àtom i aplicant una reducció per l'esquerra a la resta d'arguments:
+\subsection{Aplicació de Funcions i Currificació}
+Com assenyala Peyton Jones \cite{peyton1987implementation}, l'aplicació de funcions en els llenguatges de la família de les línies del Càlcul Lambda és \textbf{associativa per l'esquerra}. L'expressió guia \texttt{(\textbackslash x y -> x * y) 2 3} no representa una funció rebent un vector de dos arguments, sinó que conceptualment s'agrupa com \texttt{((\textbackslash x y -> x * y) 2) 3}.
 
-\begin{lstlisting}[style=haskellstyle, caption=Associativitat esquerra per a l'aplicació]
+El combinador \texttt{ap} resol aquesta propietat geomètrica recollint primer un àtom base i acumulant en una llista un nombre indeterminat d'àtoms adjacents (\texttt{ys <- mul atom}). La funció interna \texttt{insert} aplica una reducció estructural per l'esquerra (\textit{left-fold}), anidant nodes constructors \texttt{App} des dels elements inicials del flux:
+
+\begin{lstlisting}[style=haskellstyle, caption=Associativitat per l'esquerra en el combinador d'aplicació]
 ap :: Parser Expr
 ap = do
     x <- atom
@@ -68,21 +75,24 @@ ap = do
             insert exprs = (App (insert (init exprs)) (last exprs))
 \end{lstlisting}
 
-Un cop el parser ha processat completament la nostra cadena de text, genera el següent Arbre de Sintaxi Abstracta (AST), que és l'objectiu final d'aquest capítol i el punt de partida per a la inferència de tipus:
+En contraposició, el combinador \texttt{lam} realitza l'operació inversa per a la definició de paràmetres: agrupa els identificadors de variables associant cap a la \textbf{dreta}. Així, la subexpressió \texttt{\textbackslash x y -> x * y} es desugareja automàticament durant el parsatge com a dues lambdes pures imbricades: \texttt{Lam "x" (Lam "y" (...))}.
 
-Un cop el parser ha processat completament la nostra cadena de text, genera l'Arbre de Sintaxi Abstracta (AST). Com es pot observar a la Figura \ref{fig:ast_or}, la currificació es fa evident en veure com les aplicacions (\texttt{App}) s'apilen associant-se cap a l'esquerra:
+\section{Arbre de Sintaxi Abstracta Resultant}
+Una vegada el combinador final de la jerarquia ha consumit la totalitat de la cadena de caràcters de l'expressió guia, el parser retorna el corresponent Arbre de Sintaxi Abstracta (AST). 
+
+Com es pot apreciar detalladament a la Figura \ref{fig:ast_or}, la semàntica de la currificació esdevé perfectament visible en l'estructura de dades resultant: els nodes d'aplicació (\texttt{App}) s'apilen asimètricament cap a l'esquerra, col·locant l'argument terminal \texttt{Val 3} com a fill d'un node arrel que enllaça amb l'aplicació parcial prèvia. Aquesta fita clou la fase sintàctica i dota l'intèrpret de la representació formal requerida per al posterior mòdul d'inferència de tipus.
 
 \begin{figure}[h]
     \centering
     \begin{forest}
       for tree={
-        font=\ttfamily, % Lletra de codi
-        draw,           % Dibuixa un requadre al voltant del node
-        rounded corners,% Requadres arrodonits
-        align=center,   % Centra el text dins del node
-        edge={->},      % Fletxes en lloc de línies simples
-        s sep=10mm,     % Espaiat horitzontal entre germans
-        l sep=8mm       % Espaiat vertical entre nivells
+        font=\ttfamily, 
+        draw,           
+        rounded corners,
+        align=center,   
+        edge={->},      
+        s sep=10mm,     
+        l sep=8mm       
       }
       [App
         [App
@@ -104,6 +114,6 @@ Un cop el parser ha processat completament la nostra cadena de text, genera l'Ar
         [Val 3]
       ]
     \end{forest}
-    \caption{Arbre de Sintaxi Abstracta (AST) per a l'expressió \texttt{(\textbackslash x y -> x * y) 2 3}}
+    \caption{Arbre de Sintaxi Abstracta (AST) generat pel parser per a l'expressió guia \texttt{(\textbackslash x y -> x * y) 2 3}.}
     \label{fig:ast_or}
 \end{figure}

@@ -106,4 +106,5 @@ infereix ctx (If e1 e2 e3) n = do
   sUnif <- generaSubst t3 t2
   let sAcc3 = sAcc2 ++ s3 ++ sUnif 
 
-  return  (t2, sAcc3, n3)
+  generaSubst t2 t3
+  return  (t1, sAcc3, n3)
