@@ -1,10 +1,10 @@
-bhct> Bool
+bhct> Variable no trobada
 bhct> a2 -> a2
-bhct> Int
+bhct> Variable no trobada
 bhct> a2 -> a2
 bhct> 
-bhct> a1 -> Bool
-bhct> a1 -> c1
+bhct> Variable no trobada
+bhct> c1 -> c1
 bhct> Int -> Int
 bhct> Int -> Bool
 bhct> 
@@ -18,13 +18,13 @@ bhct>
 bhct> Int -> Bool
 bhct> (Bool -> t5) -> Int -> t5
 bhct> 
-bhct> No es pot unificar un enter amb un booleà
+bhct> Variable no trobada
 bhct> No es pot unificar un booleà amb un enter
 bhct> t3
 bhct> No es pot unificar un booleà amb un enter
 bhct> 
 bhct> 
-bhct> Int -> Bool
+bhct> Variable no trobada
 bhct> Bool -> Int
 bhct> Int -> Int
 bhct> 

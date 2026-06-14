@@ -6,6 +6,7 @@ import HSTipus
 import HSDef
 import GHC.Exception (fromCallSiteList)
 import Foreign (fillBytes)
+import GHC.Integer (complementInteger)
 
 --Retorna un parell: l'Addr de l'arrel de la expr que li passes i el heapstate (Següent addr disponible, graf total)
 ast2graph :: Expr -> HeapState -> [(String,Addr)] -> (Addr, HeapState)   -- Expr -> estat -> [(noms de variables a compartir, seves posicions al heap)]-> (Addr, HeapState) 
@@ -184,13 +185,14 @@ pas (a, (aa,hp)) defEnv stk =
         Just (NApp _ a3) = IM.lookup app1 hp
         Just contingut = IM.lookup a3 hp
         -- El que m'apuntava a mi, ha d'apuntar a a2
-        Just brancaDretaLam = IM.lookup a2 hp 
+        hpAmbArg = IM.insert a1 contingut hp 
+        Just brancaDretaLam = IM.lookup a2 hpAmbArg 
 
         -- s'ha d'esborrar a3
         -- S'ha de substituir:
         --  app1 pel contingut d'a2
         --  a1 pel contingut d'a3
-        newHp = IM.insert app1 brancaDretaLam (IM.delete app1 (IM.delete a (IM.insert a1 contingut (IM.delete a1 (IM.delete a3 hp))))) 
+        newHp = IM.insert app1 brancaDretaLam (IM.delete app1 (IM.delete a hpAmbArg )) 
 
       in Right (aa,newHp)
       ) 
@@ -252,32 +254,35 @@ pas (a, (aa,hp)) defEnv stk =
           in Right (aa, IM.insert a contingut (IM.delete a hp))
           )
 
-debugEvalLoop :: (Addr,HeapState) -> Int -> Either String (Addr, HeapState)
-debugEvalLoop graph 0 = Right graph 
-debugEvalLoop graph@(addr, _) (-1) =
+debugEvalLoop :: (Addr,HeapState) -> Int -> DefEnv -> Either String (Addr, HeapState)
+debugEvalLoop graph 0 _ = Right graph 
+debugEvalLoop graph@(addr, _) (-1) defEnv =
   if isWHNF graph then Right graph
     else
       do 
-        next <- pas graph preludeDefEnv []
-        hs <- debugEvalLoop (addr, next) (-1) 
+        next <- pas graph defEnv []
+        hs <- debugEvalLoop (addr, next) (-1) defEnv 
         return hs
 
-debugEvalLoop graph@(addr, _) n = 
+debugEvalLoop graph@(addr, _) n defEnv = 
   if isWHNF graph then Right graph
     else
       do
-        next <- pas graph preludeDefEnv []
-        hs <- debugEvalLoop (addr, next) (n-1) 
+        next <- pas graph defEnv []
+        hs <- debugEvalLoop (addr, next) (n-1) defEnv 
         return hs
 
-showGraph :: (Addr, HeapState) -> String
-showGraph (a, hs@(aa,hp)) =
+hsprint :: (Addr, HeapState) -> Bool -> String
+hsprint (a, hs@(aa,hp)) inLam =
   let Just n = IM.lookup a hp
   in 
     case n of 
-      NVal v -> "Val " ++ show v
-      NVar str -> "Var " ++ "\"" ++ str ++ "\""
-      NApp a1 a2 -> "App (" ++ showGraph (a1, hs) ++ ") (" ++ showGraph (a2, hs) ++ ")"
-      NLam var a1 -> "Lam (" ++ showGraph (var, hs)  ++ ") (" ++ showGraph (a1, hs) ++ ")"
+      NVal v -> (if inLam then "-> " else "") ++ show v
+      NVar str -> (if inLam then "-> " else "") ++ str
+      NApp a1 a2 -> (if inLam then "-> " else "") ++ hsprint  (a1, hs) False ++ " " ++ hsprint (a2, hs) False
+      NLam var a1 -> if inLam 
+        then hsprint (var, hs) False ++" " ++ hsprint (a1, hs) True
+        else "(\\" ++ hsprint (var,hs) False ++ " " ++ hsprint(a1,hs) True ++ ")"
+      NIf a1 a2 a3 -> (if inLam then "-> " else "") ++ "if " ++ hsprint (a1,hs) False ++ " then " ++ hsprint (a2,hs) False ++ " else " ++ hsprint (a3,hs) False
     
 

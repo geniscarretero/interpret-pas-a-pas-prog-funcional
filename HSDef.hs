@@ -28,6 +28,7 @@ data Primitive = Plus | Minus | Mult | Div | Eq | Lt | Lte | Gt | Gte | And | Or
 data EnvObj 
   = PrimDef Primitive Int    -- La primitiva i la seva aritat (quants arguments demana)
   | FuncDef Expr    -- Una funció pròpia: llista d'arguments i el seu AST (cos)
+  deriving (Show)
 
 type DefEnv = HM.HashMap String EnvObj
 

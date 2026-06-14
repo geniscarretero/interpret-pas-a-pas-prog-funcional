@@ -9,6 +9,10 @@ data Expr = Val Int                 -- Un número (42)
           | If Expr Expr Expr
           deriving (Show)
 
+data Binding = Bind String Expr
+
+data Line = Expr | Binding
+
 type TypeEnv = HM.HashMap String Tipus
 
 funcionsPredefinides = [  ("+", TFun TInt (TFun TInt TInt)),
@@ -26,8 +30,9 @@ funcionsPredefinides = [  ("+", TFun TInt (TFun TInt TInt)),
                 ("id", TFun (TVar "a") (TVar "a")),
                 ("const", TFun (TVar "a") (TFun (TVar "b") (TVar "a"))),
                 ("not", TFun (TBool) (TBool)),
-                (".", TFun (TFun (TVar "b") (TVar "c"))(TFun (TFun (TVar "a") (TVar "b")) (TFun (TVar "a") (TVar "c"))))
-
+                (".", TFun (TFun (TVar "b") (TVar "c"))(TFun (TFun (TVar "a") (TVar "b")) (TFun (TVar "a") (TVar "c")))),
+                ("True", TBool),
+                ("False", TBool)
                 ]
  
 

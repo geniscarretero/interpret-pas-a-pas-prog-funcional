@@ -141,10 +141,36 @@ compParser =  (token (stringMatch "<=") >> return "<=")
           <|> (token (sat (== '<'))     >> return "<")
           <|> (token (sat (== '>'))     >> return ">" )
 
+program :: Parser ([Binding], Expr)
+program = do
+  binds <- mul binding
+  e <- expr
+  return (binds, e)
+
+line :: Parser (Either Expr Binding)
+line = (do
+  b <- binding 
+  return (Right b)) <|> 
+       (do
+  e <- expr
+  return (Left e))
+
+binding :: Parser Binding
+binding = do
+  str <- nomVariable 
+  varList <- mul nomVariable 
+  token (sat (== '='))
+  e <- expr  
+  return (Bind str (lambdifica varList e))
+    where 
+      lambdifica [] e = e 
+      lambdifica (v:l) e = (Lam v (lambdifica l e))
+
+
 expr :: Parser Expr
 expr = lam <|> ifThenElse <|> logicOr  
 
--- Inici jerarquia 
+-- Inici   jerarquia 
 
 ifThenElse :: Parser Expr
 ifThenElse = do
