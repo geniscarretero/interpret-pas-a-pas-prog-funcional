@@ -107,3 +107,22 @@ infereix ctx (If e1 e2 e3) n = do
 
   -- Retornem el tipus real de la branca (t2) corregit amb les substitucions
   return (aplicaSubst sAcc3 t2, sAcc3, n3)
+
+-- Inferència per a una definició potencialment recursiva
+-- Context -> Nom de la funció -> Cos de la funció -> Comptador -> Resultat
+infereixDefRec :: Context -> String -> Expr -> Int -> Either String (Tipus, Subst, Int)
+infereixDefRec ctx nomFunció cosExpr n = do
+  -- 1. Creem una variable de tipus "fresca" assumint que és el tipus de la funció
+  let t_suposat = TVar ("t" ++ show n)
+  
+  -- 2. Afegim aquesta hipòtesi al context i inferim el cos de la funció
+  -- Ara, si el cos en fa ús, 'lookup' la trobarà com a (TVar "tX")
+  (t_cos, s1, n1) <- infereix ((nomFunció, t_suposat) : ctx) cosExpr (n + 1)
+  
+  -- 3. Unifiquem el tipus que havíem suposat (aplicant-li les substitucions acumulades)
+  -- amb el tipus real que ens ha retornat el cos
+  s2 <- generaSubst (aplicaSubst s1 t_suposat) t_cos
+  
+  -- 4. Ajuntem totes les substitucions i retornem el tipus final corregit
+  let sTotal = s2 ++ s1
+  return (aplicaSubst sTotal t_cos, sTotal, n1)

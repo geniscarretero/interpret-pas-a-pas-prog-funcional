@@ -51,16 +51,16 @@ getNumParams t n =
     TFun _ t2 -> getNumParams t2 (n+1)
     _ -> n
 
-getNumAppOfPredFunc :: (Addr,HeapState) -> Int -> (Bool, Int, Int)
-getNumAppOfPredFunc (a, (aa,hp)) i = 
+getNumAppOfPredFunc :: (Addr,HeapState) -> Int -> TypeEnv -> (Bool, Int, Int)
+getNumAppOfPredFunc (a, (aa,hp)) i  typeEnv= 
   let Just n = IM.lookup a hp
   in case n of 
     NVal _ -> (False, i, 0)
-    NVar str -> case HM.lookup str preludeTypeEnv of
+    NVar str -> case HM.lookup str typeEnv of
       Nothing -> (False, i, 0)
       Just t -> (True, i, (getNumParams t 0))
     NLam _ _ -> (False, i, 0)
-    NApp a1 _ -> getNumAppOfPredFunc (a1,(aa,hp)) (i+1)
+    NApp a1 _ -> getNumAppOfPredFunc (a1,(aa,hp)) (i+1) typeEnv
 
 -- WHNF:
 --Weak Head Normal Form (WHNF): una expressió està en WHNF si és:
@@ -68,8 +68,8 @@ getNumAppOfPredFunc (a, (aa,hp)) i =
 --    funció predefinida parcialment aplicada ((+) ((-) 4 3)).
 
 -- Bàsicament rep el graf i diu si és WHNF o no
-isWHNF :: (Addr, HeapState) -> Bool 
-isWHNF (a, (aa,hp)) =
+isWHNF :: (Addr, HeapState) -> TypeEnv -> Bool 
+isWHNF (a, (aa,hp)) typeEnv =
   let Just n = IM.lookup a hp
   in case n of
     NVal _ -> True
@@ -77,7 +77,7 @@ isWHNF (a, (aa,hp)) =
     NLam _ _ -> True
     NApp _ _ -> (
       let 
-        (b1, nApps, nPars) = getNumAppOfPredFunc (a, (aa,hp)) 0
+        (b1, nApps, nPars) = getNumAppOfPredFunc (a, (aa,hp)) 0 typeEnv
       in case b1 of
           True  -> if nApps >= nPars then False else True
           False -> False
@@ -174,8 +174,8 @@ compute Or [a1, a2] (aa,hp) =
 -- Int = quantes aplicacions s'han de treure?
 --  indica que, si s'ha fet una aplicació s'ha de canviar l'adreça per la nova que tha donat
 --  Es pot treure el bool de retorn, ho puc fer directament abans del backtrack
-pas :: (Addr, HeapState) -> DefEnv -> [Addr] -> Either String HeapState
-pas (a, (aa,hp)) defEnv stk =
+pas :: (Addr, HeapState) -> TypeEnv -> DefEnv -> [Addr] -> Either String HeapState
+pas (a, (aa,hp)) typeEnv defEnv stk =
   let Just n = IM.lookup a hp
   in case n of
     NLam a1 a2 -> (
@@ -206,12 +206,12 @@ pas (a, (aa,hp)) defEnv stk =
               Just (NApp _ p2) = IM.lookup app2 hp
             in
               -- Primer cas, el primer paràmetre no esta en WHNF, és a dir, es pot fer algun pas 
-              if not (isWHNF (p1, (aa,hp))) 
-                then pas (p1, (aa,hp)) defEnv [] -- pas fet
+              if not (isWHNF (p1, (aa,hp)) typeEnv) 
+                then pas (p1, (aa,hp)) typeEnv defEnv [] -- pas fet
                 else (
                   -- Segon cas, el segon (i últim) paràmetre no esta en WHNF, és a dir, es pot fer algun pas
-                  if not (isWHNF (p2, (aa,hp))) 
-                    then pas (p2, (aa,hp)) defEnv [] -- pas fet
+                  if not (isWHNF (p2, (aa,hp)) typeEnv) 
+                    then pas (p2, (aa,hp)) typeEnv defEnv [] -- pas fet
                     else 
                     (
                       -- Els dos estan en WHNF suposadament seràn o numeros o True/False
@@ -241,9 +241,9 @@ pas (a, (aa,hp)) defEnv stk =
         Nothing -> Left "Variable no trobada" 
         )
     NVal _ -> Right (aa,hp) -- Hauria de petar
-    NApp a1 a2 -> pas (a1, (aa,hp)) defEnv (a:stk)
-    NIf a1 a2 a3 -> if not (isWHNF (a1,(aa,hp)) ) 
-      then pas (a1, (aa, hp)) defEnv []
+    NApp a1 a2 -> pas (a1, (aa,hp)) typeEnv defEnv (a:stk)
+    NIf a1 a2 a3 -> if not (isWHNF (a1,(aa,hp)) typeEnv) 
+      then pas (a1, (aa, hp)) typeEnv defEnv []
       else case IM.lookup a1 hp of 
         Just (NVar "True") ->( 
           let Just contingut = IM.lookup a2 hp
@@ -254,22 +254,22 @@ pas (a, (aa,hp)) defEnv stk =
           in Right (aa, IM.insert a contingut (IM.delete a hp))
           )
 
-debugEvalLoop :: (Addr,HeapState) -> Int -> DefEnv -> Either String (Addr, HeapState)
-debugEvalLoop graph 0 _ = Right graph 
-debugEvalLoop graph@(addr, _) (-1) defEnv =
-  if isWHNF graph then Right graph
+debugEvalLoop :: (Addr,HeapState) -> Int -> TypeEnv -> DefEnv -> Either String (Addr, HeapState)
+debugEvalLoop graph 0 _ _ = Right graph 
+debugEvalLoop graph@(addr, _) (-1) typeEnv defEnv =
+  if isWHNF graph typeEnv then Right graph
     else
       do 
-        next <- pas graph defEnv []
-        hs <- debugEvalLoop (addr, next) (-1) defEnv 
+        next <- pas graph typeEnv defEnv []
+        hs <- debugEvalLoop (addr, next) (-1) typeEnv defEnv 
         return hs
 
-debugEvalLoop graph@(addr, _) n defEnv = 
-  if isWHNF graph then Right graph
+debugEvalLoop graph@(addr, _) n typeEnv defEnv = 
+  if isWHNF graph typeEnv then Right graph
     else
       do
-        next <- pas graph defEnv []
-        hs <- debugEvalLoop (addr, next) (n-1) defEnv 
+        next <- pas graph typeEnv defEnv []
+        hs <- debugEvalLoop (addr, next) (n-1) typeEnv defEnv 
         return hs
 
 hsprint :: (Addr, HeapState) -> Bool -> String

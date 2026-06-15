@@ -45,7 +45,7 @@ instance Alternative Parser where
   (<|>) = or'
 
 paraulesProhibides :: [String]
-paraulesProhibides = ["if", "then", "else"]
+paraulesProhibides = ["if", "then", "else", "True", "False"]
 
 result :: a -> Parser a
 result val = Parser $ \inp -> [(val, inp)]
@@ -156,19 +156,27 @@ line = (do
   return (Left e))
 
 binding :: Parser Binding
-binding = do
-  str <- nomVariable 
+binding = (do
+  str <- (nomVariable <|> (token(sat (== '(')) *> nomOperador <* token (sat (== ')'))))
   varList <- mul nomVariable 
   token (sat (== '='))
   e <- expr  
   return (Bind str (lambdifica varList e))
+  ) <|> (do
+  str1 <- nomVariable 
+  op <- token nomOperador
+  str2 <- nomVariable 
+  token (sat (== '='))
+  e <- expr
+  return (Bind op (lambdifica [str1,str2] e))
+  )
+
     where 
       lambdifica [] e = e 
       lambdifica (v:l) e = (Lam v (lambdifica l e))
 
-
 expr :: Parser Expr
-expr = lam <|> ifThenElse <|> logicOr  
+expr = lam <|> ifThenElse <|> operator  
 
 -- Inici   jerarquia 
 
@@ -181,7 +189,15 @@ ifThenElse = do
   token (stringMatch "else")
   e3 <- token expr
   return (If e1 e2 e3)
-  
+
+operator :: Parser Expr
+operator = do
+  t1 <- logicOr
+  (do 
+      op <- token nomOperador
+      t2 <- operator
+      return (App (App (Var op) t1) t2)
+      ) <|> return t1
 
 logicOr :: Parser Expr
 logicOr = do

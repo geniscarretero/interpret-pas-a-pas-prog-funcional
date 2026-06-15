@@ -46,6 +46,8 @@ preludeDefEnv = HM.fromList
   , (">=",     PrimDef Gte 2)
   , ("&&",     PrimDef And 2)
   , ("||",     PrimDef Or 2)
+  , ("True", FuncDef (Var "True"))
+  , ("False", FuncDef (Var "False"))
  -- Les funcions predefinides ja les carregaré amb un codi previ 
   ]
 

@@ -57,13 +57,15 @@ output (Just input) m typeEnv defEnv =
                 Right _ -> (do
                   let (a, hs) = ast2graph e (0, IM.empty) []  
                 
-                  case debugEvalLoop (a,hs)  (-1) defEnv of
+                  case debugEvalLoop (a,hs)  (-1) typeEnv defEnv of
                     Left text -> return (text, typeEnv, defEnv)
+                    --Right (a1,hs1) -> return ((show (a1,hs1)), typeEnv, defEnv)
                     Right (a1,hs1) -> return ((hsprint (a1,hs1) False), typeEnv, defEnv)
                   )
               Right (Bind str e) -> 
-                case infereix (HM.toList typeEnv) e 1 of
+                case infereixDefRec (HM.toList typeEnv) str e 1 of
                   Left text -> return (text, typeEnv, defEnv)
+                  --Right (t, _, _) -> return ("typeEnv:\n"++show (HM.insert str t typeEnv)++ "\ndefEnv\n" ++ show (HM.insert str (FuncDef e) defEnv) ++ "\n" , (HM.insert str t typeEnv), (HM.insert str (FuncDef e) defEnv) )
                   Right (t, _, _) -> return ("" , (HM.insert str t typeEnv), (HM.insert str (FuncDef e) defEnv) )
         [(res, rest)] -> (do 
             let pos = length input - length rest
