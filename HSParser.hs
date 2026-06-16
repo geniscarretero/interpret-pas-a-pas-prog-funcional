@@ -5,6 +5,7 @@ import Control.Monad (MonadPlus (..), void)
 import qualified Data.Bifunctor as Bifunctor
 import Data.Char (isDigit, isLower, isLetter)
 import HSTipus
+import Debug.Trace (trace) --Per trobar errors
 
 -- Parser
 -- https://deepsource.com/blog/monadic-parser-combinators
@@ -44,8 +45,12 @@ instance Alternative Parser where
   empty = zero
   (<|>) = or'
 
+
+paraulesProhibidesBind :: [String]
+paraulesProhibidesBind = ["if", "then", "else", "True", "False", "otherwise"]
+
 paraulesProhibides :: [String]
-paraulesProhibides = ["if", "then", "else", "True", "False"]
+paraulesProhibides = ["if", "then", "else", "otherwise"]
 
 result :: a -> Parser a
 result val = Parser $ \inp -> [(val, inp)]
@@ -94,8 +99,18 @@ nomVariable = token $ do
     if elem (x:xs) paraulesProhibides then empty
     else return (x:xs)
 
+nomVariableBind :: Parser String
+nomVariableBind = token $ do
+    x <- lletra
+    xs <- mul (lletra <|> digit)
+    if elem (x:xs) paraulesProhibidesBind then empty
+    else return (x:xs)
+
 nomOperador :: Parser String
-nomOperador = (token (mes (sat (`elem` ".+-$*/%=<>:!&|"))))
+nomOperador = do 
+  op <- (token (mes (sat (`elem` ".+-$*/%=<>:!&|"))))
+  if op `elem` ["|", "="] then empty 
+    else return op
 
 stringMatch :: String -> Parser String
 stringMatch (c:str) = do
@@ -148,40 +163,61 @@ program = do
   return (binds, e)
 
 line :: Parser (Either Expr Binding)
-line = (do
-  b <- binding 
-  return (Right b)) <|> 
-       (do
-  e <- expr
-  return (Left e))
+line = do
+  (do 
+    b <- binding 
+    return (Right b)
+    )<|>(do
+    e <- expr
+    return (Left e)
+    )
+
 
 binding :: Parser Binding
 binding = (do
-  str <- (nomVariable <|> (token(sat (== '(')) *> nomOperador <* token (sat (== ')'))))
-  varList <- mul nomVariable 
-  token (sat (== '='))
-  e <- expr  
-  return (Bind str (lambdifica varList e))
-  ) <|> (do
-  str1 <- nomVariable 
-  op <- token nomOperador
-  str2 <- nomVariable 
+  str <- (nomVariableBind <|> (token(sat (== '(')) *> nomOperador <* token (sat (== ')'))))
+  varList <- mul nomVariable
   token (sat (== '='))
   e <- expr
-  return (Bind op (lambdifica [str1,str2] e))
+  return (Bind str (lambdifica varList e))
+  ) <|> (do
+  str <- token nomVariableBind
+  varList <- mes nomVariable 
+  elements <- mul guardElement
+  final <- finalGuardElement 
+  return (Bind str (lambdifica varList (ififica (elements++[final]))))
   )
-
     where 
-      lambdifica [] e = e 
+      lambdifica [] e = e
       lambdifica (v:l) e = (Lam v (lambdifica l e))
+
+      ififica :: [(Expr, Expr)] -> Expr
+      ififica [(_,r)] = r         --Otherwise
+      ififica ((b,r):elements) = (If b r (ififica elements))
+
+guardElement :: Parser (Expr, Expr)
+guardElement = do
+  token (sat (== '|'))
+  e1 <- token expr
+  token (sat (== '='))
+  r1 <- token expr
+  return (e1,r1)
+
+finalGuardElement::Parser (Expr,Expr)
+finalGuardElement = token $ do 
+  token (sat (== '|'))
+  token (stringMatch "otherwise")
+  token (sat (== '='))
+  r1 <- token expr
+  return ((Var "otherwise"),r1) 
+
+-- Inici   jerarquia 
 
 expr :: Parser Expr
 expr = lam <|> ifThenElse <|> operator  
 
--- Inici   jerarquia 
-
 ifThenElse :: Parser Expr
-ifThenElse = do
+ifThenElse = (do
   token (stringMatch "if")
   e1 <- token expr
   token (stringMatch "then")
@@ -189,6 +225,8 @@ ifThenElse = do
   token (stringMatch "else")
   e3 <- token expr
   return (If e1 e2 e3)
+  )
+
 
 operator :: Parser Expr
 operator = do
@@ -196,7 +234,8 @@ operator = do
   (do 
       op <- token nomOperador
       t2 <- operator
-      return (App (App (Var op) t1) t2)
+      if op == "|" then empty --ESBORRAR
+      else return (App (App (Var op) t1) t2)
       ) <|> return t1
 
 logicOr :: Parser Expr

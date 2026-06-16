@@ -9,9 +9,9 @@ data Expr = Val Int                 -- Un número (42)
           | If Expr Expr Expr
           deriving (Show)
 
-data Binding = Bind String Expr
+data Binding = Bind String Expr deriving (Show)
 
-data Line = Expr | Binding
+data Line = Expr | Binding deriving (Show)
 
 type TypeEnv = HM.HashMap String Tipus
 

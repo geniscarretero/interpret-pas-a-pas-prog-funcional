@@ -27,7 +27,7 @@ data Primitive = Plus | Minus | Mult | Div | Eq | Lt | Lte | Gt | Gte | And | Or
 -- 2. Què pot haver-hi guardat en el llistat global?
 data EnvObj 
   = PrimDef Primitive Int    -- La primitiva i la seva aritat (quants arguments demana)
-  | FuncDef Expr    -- Una funció pròpia: llista d'arguments i el seu AST (cos)
+  | FuncDef Expr    -- Una funció pròpia: codi AST (cos)
   deriving (Show)
 
 type DefEnv = HM.HashMap String EnvObj
