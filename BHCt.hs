@@ -68,6 +68,7 @@ output (Just input) m typeEnv defEnv typeNum=
                   _ ->
                     (do
                       let (a, hs) = ast2graph e (0, IM.empty) []  
+                      --return ((show (a,hs) ++ show typeEnv), typeEnv, defEnv, newTypeNum) -- Esborrar
                     
                       case evalLoop (a,hs)  (-1) typeEnv defEnv [] of
                         Left text -> return (text, typeEnv, defEnv, newTypeNum)

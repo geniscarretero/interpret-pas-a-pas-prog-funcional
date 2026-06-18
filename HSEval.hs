@@ -49,6 +49,39 @@ graph2ast (a, hs@(_,hp)) =
         Just (NVar str) = IM.lookup a1 hp
     Just (NIf a1 a2 a3) -> (If (graph2ast (a1,hs)) (graph2ast (a2,hs)) (graph2ast (a3,hs)) )
 
+copyGraph :: (Addr,HeapState) -> [(String,Addr)] -> (Addr, HeapState)   -- Expr -> estat -> [(noms de variables a compartir, seves posicions al heap)]-> (Addr, HeapState) 
+copyGraph (addr, (a, heap)) strAddr =
+  case IM.lookup addr heap of
+
+    Just (NVal v) -> (a, (a+1, IM.insert a (NVal v) heap))
+
+    Just (NVar s) -> 
+      case lookup s strAddr of
+        Just addr -> (addr, (a, heap))
+        Nothing -> (a, (a+1, IM.insert a (NVar s) heap))
+
+    Just (NApp e1 e2)->
+      let 
+        (a1, (a11,hs1)) = copyGraph (e1,(a+1, heap)) strAddr
+        (a2, (a22,hs2)) = copyGraph (e2,(a11,hs1)) strAddr
+      in
+        (a, (a22, IM.insert a (NApp a1 a2) hs2))
+
+    Just (NLam aStr e) ->
+      let 
+        Just (NVar str) = IM.lookup aStr heap
+        (a1, (a11,hs1)) = copyGraph (e, (a+2, heap)) ((str,(a+1)):strAddr)
+      in
+        (a, (a11, IM.insert a (NLam (a+1) a1) (IM.insert (a+1) (NVar str) hs1)))
+
+    Just (NIf e1 e2 e3) ->
+      let 
+        (a1, (aa1, hs1)) = copyGraph (e1, (a+1, heap)) strAddr
+        (a2, (aa2, hs2)) = copyGraph (e2, (aa1, hs1)) strAddr
+        (a3, (aa3, hs3)) = copyGraph (e3, (aa2, hs2)) strAddr
+      in (a, (aa3, (IM.insert a (NIf a1 a2 a3) hs3)))
+
+
 
 -- Comencem AVALUACIÓ
 -- Bucle
@@ -192,23 +225,28 @@ pas :: (Addr, HeapState) -> TypeEnv -> DefEnv -> [Addr] -> Either String HeapSta
 pas (a, (aa,hp)) typeEnv defEnv stk =
   let Just n = IM.lookup a hp
   in case n of
-    NLam a1 a2 -> (
+    NLam _ _ -> (
       let 
         (app1:_) = stk
+        -- fer una còpia de la lambda (perque potser algú més la torna a fer servir)
+        (aNewLam, (aa1, hpNew)) = copyGraph (a, (aa,hp)) []
+        Just (NLam a1 a2) = IM.lookup aNewLam hpNew
+        
+
         -- el que apunta a a1 ha de ser el contingut de a3
-        Just (NApp _ a3) = IM.lookup app1 hp
-        Just contingut = IM.lookup a3 hp
+        Just (NApp _ a3) = IM.lookup app1 hpNew
+        Just contingut = IM.lookup a3 hpNew
         -- El que m'apuntava a mi, ha d'apuntar a a2
-        hpAmbArg = IM.insert a1 contingut hp 
+        hpAmbArg = IM.insert a1 contingut hpNew 
         Just brancaDretaLam = IM.lookup a2 hpAmbArg 
 
         -- s'ha d'esborrar a3
         -- S'ha de substituir:
         --  app1 pel contingut d'a2
         --  a1 pel contingut d'a3
-        newHp = IM.insert app1 brancaDretaLam (IM.delete app1 (IM.delete a hpAmbArg )) 
+        newHp = IM.insert app1 brancaDretaLam hpAmbArg 
 
-      in Right (aa,newHp)
+      in Right (aa1,newHp)
       ) 
     NVar s -> (
       case HM.lookup s defEnv of 
@@ -237,7 +275,7 @@ pas (a, (aa,hp)) typeEnv defEnv stk =
                         -- Per tant: eliminar app1, app2 i addrnew
                         -- No puc eliminar fills app1 i app2 pq no sé si es tornen a utilitzar (implementar gc en IM)
                         -- substituir app2 amb contingut nou
-                        newHp = IM.insert app2 contingut (IM.delete addrNew (IM.delete a (IM.delete app2 (IM.delete app1 hp1))))
+                        newHp = IM.insert app2 contingut hp1
                       in 
                         Right (aa1,newHp) -- Pas fet
                     )
@@ -249,7 +287,7 @@ pas (a, (aa,hp)) typeEnv defEnv stk =
               (addr, (aa1, hp1)) = ast2graph expr (aa,hp) [] -- Substitueixo pel graph ja fet del supercombinador (pas fet)
               Just contingut = IM.lookup addr hp1
               --Eliminar nou node i substituir per el que ens apunta a nosaltress
-            in Right(aa1, (IM.insert a contingut (IM.delete a (IM.delete addr hp1))))
+            in Right(aa1, (IM.insert a contingut hp1))
             )
           )
         Nothing -> Left "Variable no trobada" 
@@ -261,11 +299,11 @@ pas (a, (aa,hp)) typeEnv defEnv stk =
       else case IM.lookup a1 hp of 
         Just (NVar "True") ->( 
           let Just contingut = IM.lookup a2 hp
-          in Right (aa, IM.insert a contingut (IM.delete a hp))
+          in Right (aa, IM.insert a contingut hp)
           )
         Just (NVar "False") ->( 
           let Just contingut = IM.lookup a3 hp
-          in Right (aa, IM.insert a contingut (IM.delete a hp))
+          in Right (aa, IM.insert a contingut hp)
           )
 
 evalVar :: (Addr,HeapState) -> TypeEnv -> DefEnv -> [String] -> Either String ((Addr, HeapState),[String])
