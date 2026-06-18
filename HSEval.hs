@@ -7,6 +7,7 @@ import HSDef
 import GHC.Exception (fromCallSiteList)
 import Foreign (fillBytes)
 import GHC.Integer (complementInteger)
+import Data.Char (isLetter)
 
 --Retorna un parell: l'Addr de l'arrel de la expr que li passes i el heapstate (Següent addr disponible, graf total)
 ast2graph :: Expr -> HeapState -> [(String,Addr)] -> (Addr, HeapState)   -- Expr -> estat -> [(noms de variables a compartir, seves posicions al heap)]-> (Addr, HeapState) 
@@ -35,6 +36,19 @@ ast2graph  (If e1 e2 e3) (a, graph) strAddr =
     (a2, (aa2, hs2)) = ast2graph e2 (aa1, hs1) strAddr
     (a3, (aa3, hs3)) = ast2graph e3 (aa2, hs2) strAddr
   in (a, (aa3, (IM.insert a (NIf a1 a2 a3) hs3)))
+
+
+graph2ast :: (Addr, HeapState) -> Expr
+graph2ast (a, hs@(_,hp)) =
+  case IM.lookup a hp of
+    Just (NVar s) -> (Var s)
+    Just (NVal i) -> (Val i)
+    Just (NApp a1 a2) -> (App (graph2ast (a1,hs)) (graph2ast (a2,hs)))
+    Just (NLam a1 a2) -> (Lam str (graph2ast (a2,hs)))
+      where 
+        Just (NVar str) = IM.lookup a1 hp
+    Just (NIf a1 a2 a3) -> (If (graph2ast (a1,hs)) (graph2ast (a2,hs)) (graph2ast (a3,hs)) )
+
 
 -- Comencem AVALUACIÓ
 -- Bucle
@@ -254,23 +268,31 @@ pas (a, (aa,hp)) typeEnv defEnv stk =
           in Right (aa, IM.insert a contingut (IM.delete a hp))
           )
 
-debugEvalLoop :: (Addr,HeapState) -> Int -> TypeEnv -> DefEnv -> Either String (Addr, HeapState)
-debugEvalLoop graph 0 _ _ = Right graph 
-debugEvalLoop graph@(addr, _) (-1) typeEnv defEnv =
-  if isWHNF graph typeEnv then Right graph
+evalVar :: (Addr,HeapState) -> TypeEnv -> DefEnv -> [String] -> Either String ((Addr, HeapState),[String])
+evalVar graph@(addr, _) typeEnv defEnv trace =
+  do 
+    next <- pas graph typeEnv defEnv []
+    (hs,trace1) <- evalLoop (addr, next) (-1) typeEnv defEnv trace 
+    return (hs, ((hsprint graph False):trace1))
+
+evalLoop :: (Addr,HeapState) -> Int -> TypeEnv -> DefEnv -> [String] -> Either String ((Addr, HeapState),[String])
+evalLoop graph 0 _ _ trace = Right (graph, ((hsprint graph False):trace)) 
+evalLoop graph@(addr, _) (-1) typeEnv defEnv trace =
+  if isWHNF graph typeEnv then Right (graph,((hsprint graph False):trace))
     else
       do 
         next <- pas graph typeEnv defEnv []
-        hs <- debugEvalLoop (addr, next) (-1) typeEnv defEnv 
-        return hs
+        (hs,trace1) <- evalLoop (addr, next) (-1) typeEnv defEnv trace 
+        return (hs, ((hsprint graph False):trace1))
 
-debugEvalLoop graph@(addr, _) n typeEnv defEnv = 
-  if isWHNF graph typeEnv then Right graph
+evalLoop graph@(addr, _) n typeEnv defEnv trace = 
+  if isWHNF graph typeEnv then Right (graph,((hsprint graph False):trace))
     else
       do
         next <- pas graph typeEnv defEnv []
-        hs <- debugEvalLoop (addr, next) (n-1) typeEnv defEnv 
-        return hs
+        (hs,trace1) <- evalLoop (addr, next) (n-1) typeEnv defEnv trace 
+        return (hs, ((hsprint graph False):trace1))
+
 
 hsprint :: (Addr, HeapState) -> Bool -> String
 hsprint (a, hs@(aa,hp)) inLam =
@@ -279,10 +301,32 @@ hsprint (a, hs@(aa,hp)) inLam =
     case n of 
       NVal v -> (if inLam then "-> " else "") ++ show v
       NVar str -> (if inLam then "-> " else "") ++ str
-      NApp a1 a2 -> (if inLam then "-> " else "") ++ hsprint  (a1, hs) False ++ " " ++ hsprint (a2, hs) False
+      NApp a1 a2 -> 
+        let (c1,c2) = calPar a1 a2 hs
+        in
+          (if inLam then "-> " else "") ++
+          (if c1 then "(" ++ hsprint  (a1, hs) False ++ ")" 
+          else hsprint  (a1, hs) False)
+          ++ " " ++
+          (if c2 then "(" ++ hsprint  (a2, hs) False ++ ")" 
+          else hsprint  (a2, hs) False)
+
       NLam var a1 -> if inLam 
         then hsprint (var, hs) False ++" " ++ hsprint (a1, hs) True
         else "(\\" ++ hsprint (var,hs) False ++ " " ++ hsprint(a1,hs) True ++ ")"
       NIf a1 a2 a3 -> (if inLam then "-> " else "") ++ "if " ++ hsprint (a1,hs) False ++ " then " ++ hsprint (a2,hs) False ++ " else " ++ hsprint (a3,hs) False
-    
+
+-- Si fill dret és app o lam parèntesi
+-- Si fill esq és a dir una var, si la var és paraula no cal sinó si
+--
+calPar :: Addr -> Addr -> HeapState -> (Bool,Bool) -- Esquerra i dreta
+calPar a1 a2 (_,hp) = (b1, b2)
+  where
+    b1 = case IM.lookup a1 hp of
+      Just (NVar var) -> case var of 
+        (l:_) -> not (isLetter l)
+      Just _ -> False
+    b2 = case IM.lookup a2 hp of
+      Just (NApp _ _) -> True
+      Just _ -> False
 

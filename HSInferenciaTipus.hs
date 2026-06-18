@@ -46,7 +46,7 @@ renameTVar (TFun t1 t2) n = do
   r1 <- (renameTVar t1 n)
   r2 <- (renameTVar t2 n)
   return (TFun r1 r2)
-renameTVar (TVar ('t':r)) n = Nothing  --la deixem igual si comença amb t, (meves)
+renameTVar (TVar ('t':rest)) n = Just (TVar ('t':rest))  --la deixem igual si comença amb t, (meves)
 renameTVar (TVar s) n = Just (TVar (s++(show n)))
 renameTVar t _ = Nothing
 
