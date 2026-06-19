@@ -34,9 +34,17 @@ generaSubst (TFun t1 t2) (TFun t3 t4) = do
   return (second ++ first) -- Posem les més recents primer
 generaSubst (TVar ('t':s1)) (TVar s2) = Right [(('t':s1), (TVar s2))]  
 generaSubst (TVar s1) (TVar s2) = Right [(s2, (TVar s1))]  
-generaSubst t (TVar s) = Right [(s, t)]
-generaSubst (TVar s) t = Right [(s, t)]
+generaSubst t (TVar s) 
+  | TVar s == t = return []
+  | ocorreEn s t = Left "Tipus infinit"
+  | otherwise = return [(s,t)]
+generaSubst (TVar s) t = generaSubst t (TVar s)
 generaSubst _ _ =  Right []
+
+ocorreEn :: String -> Tipus -> Bool
+ocorreEn s (TVar a) = s == a 
+ocorreEn s (TFun t1 t2) = ocorreEn s t1 || ocorreEn s t2 
+ocorreEn _ _ = False
 
 envInicial :: Context
 envInicial = funcionsPredefinides ++ [("True", TBool), ("False", TBool)]
@@ -50,41 +58,56 @@ renameTVar (TVar ('t':rest)) n = Just (TVar ('t':rest))  --la deixem igual si co
 renameTVar (TVar s) n = Just (TVar (s++(show n)))
 renameTVar t _ = Nothing
 
-infereix :: Context -> Expr -> Int -> Either String (Tipus, Subst, Int)
-infereix _ (Val _) i = Right (TInt, [], i) 
+forceRenameTVar :: Tipus -> Int -> Maybe Tipus
+forceRenameTVar (TFun t1 t2) n = do 
+  r1 <- (renameTVar t1 n)
+  r2 <- (renameTVar t2 n)
+  return (TFun r1 r2)
+forceRenameTVar (TVar s) n = Just (TVar (s++(show n)))
+forceRenameTVar t _ = Nothing
 
-infereix ctx (Var a) n = case lookup a ctx of
+infereix :: Context -> Context -> Expr -> Int -> Either String (Tipus, Subst, Int)
+infereix _ _ (Val _) i = Right (TInt, [], i) 
+
+infereix inictx ctx (Var a) n = case lookup a ctx of
                   Nothing -> Left "Variable no trobada"
                   Just t -> do 
-                    case renameTVar t n of
-                      Just t1 -> Right (t1, [], (n+1))
-                      Nothing -> Right (t, [], n)
+                    case lookup a inictx of
+                      Nothing ->
+                        case renameTVar t n of
+                          Just t1 -> Right (t1, [], (n+1))
+                          Nothing -> Right (t, [], n)
+                      Just tNew -> 
+                        case forceRenameTVar tNew n of
+                          Just t1 -> Right (t1, [], (n+1))
+                          Nothing -> Right (t, [], n)
+                          
 
-infereix ctx (Lam "True" e) n = infereix ctx (Lam "False" e) n
-infereix ctx (Lam "False" e) n = do
+infereix inictx ctx (Lam "True" e) n = infereix inictx ctx (Lam "False" e) n
+infereix inictx ctx (Lam "False" e) n = do
   t_s <- Right (TBool)                                    -- Tipus de variable de lambda (b)
-  (t1, s1, n1) <- infereix ctx e n                        -- Tipus del cos de lambda (c)
+  (t1, s1, n1) <- infereix inictx ctx e n                        -- Tipus del cos de lambda (c)
   t_retorn <- Right (aplicaSubst s1 (TFun t_s t1))        -- a = b -> c
   return (t_retorn, s1, n1)
 
-infereix ctx (Lam s e) n = do
+infereix inictx ctx (Lam s e) n = do
   case all isDigit s of
     True -> (do  
       t_s <- Right (TInt)                                     -- Tipus de variable de lambda (b)
-      (t1, s1, n1) <- infereix ctx e n                        -- Tipus del cos de lambda (c)
+      (t1, s1, n1) <- infereix inictx ctx e n                        -- Tipus del cos de lambda (c)
       t_retorn <- Right (aplicaSubst s1 (TFun t_s t1))        -- a = b -> c
       return (t_retorn, s1, n1)
       )
     False -> (do  
       t_s <- Right (TVar ("t"++ show n ))                     -- Tipus de variable de lambda (b)
-      (t1, s1, n1) <- infereix ((s,t_s):ctx) e (n+1)          -- Tipus del cos de lambda (c)
+      (t1, s1, n1) <- infereix inictx ((s,t_s):ctx) e (n+1)          -- Tipus del cos de lambda (c)
       t_retorn <- Right (aplicaSubst s1 (TFun t_s t1))        -- a = b -> c
       return (t_retorn, s1, n1)
       )
 
-infereix ctx (App e1 e2) n = do
-  (t1, s1, n1) <- infereix ctx e1 n                       -- Tipus del cos de l'aplicació (b)
-  (t2, s2, n2) <- infereix (aplicaSubstCtx s1 ctx) e2 n1  -- Tipus del cos de lambda (c)
+infereix inictx ctx (App e1 e2) n = do
+  (t1, s1, n1) <- infereix inictx ctx e1 n                       -- Tipus del cos de l'aplicació (b)
+  (t2, s2, n2) <- infereix inictx (aplicaSubstCtx s1 ctx) e2 n1  -- Tipus del cos de lambda (c)
   
   t3 <- Right (TVar ("t" ++ show n2))                     -- Tipus de l'aplicació (a)
 
@@ -93,15 +116,15 @@ infereix ctx (App e1 e2) n = do
   
   return (aplicaSubst s3 t3, s3 ++ s2 ++ s1, n2 + 1)
 
-infereix ctx (If e1 e2 e3) n = do
-  (t1, s1, n1) <- infereix ctx e1 n
+infereix inictx ctx (If e1 e2 e3) n = do
+  (t1, s1, n1) <- infereix inictx ctx e1 n
   sCond <- generaSubst t1 TBool
   let sAcc1 = sCond ++ s1
 
-  (t2 ,s2, n2) <- infereix (aplicaSubstCtx sAcc1 ctx) e2 n1
+  (t2 ,s2, n2) <- infereix inictx (aplicaSubstCtx sAcc1 ctx) e2 n1
   let sAcc2 = s2 ++ sAcc1
 
-  (t3, s3, n3) <- infereix (aplicaSubstCtx sAcc2 ctx) e3 n2
+  (t3, s3, n3) <- infereix inictx (aplicaSubstCtx sAcc2 ctx) e3 n2
   sUnif <- generaSubst t3 t2
   let sAcc3 = sUnif ++ sAcc2 
 
@@ -110,18 +133,18 @@ infereix ctx (If e1 e2 e3) n = do
 
 -- Inferència per a una definició potencialment recursiva
 -- Context -> Nom de la funció -> Cos de la funció -> Comptador -> Resultat
-infereixDefRec :: Context -> String -> Expr -> Int -> Either String (Tipus, Subst, Int)
-infereixDefRec ctx nomFunció cosExpr n = do
+infereixDefRec :: Context -> Context -> String -> Expr -> Int -> Either String (Tipus, Subst, Int)
+infereixDefRec inictx ctx nomFunció cosExpr n = do
   -- 1. Creem una variable de tipus "fresca" assumint que és el tipus de la funció
   let t_suposat = TVar ("t" ++ show n)
   
   -- 2. Afegim aquesta hipòtesi al context i inferim el cos de la funció
   -- Ara, si el cos en fa ús, 'lookup' la trobarà com a (TVar "tX")
-  (t_cos, s1, n1) <- infereix ((nomFunció, t_suposat) : ctx) cosExpr (n + 1)
+  (t_cos, s1, n1) <- infereix inictx ((nomFunció, t_suposat) : ctx) cosExpr (n + 1)
   
   -- 3. Unifiquem el tipus que havíem suposat (aplicant-li les substitucions acumulades)
   -- amb el tipus real que ens ha retornat el cos
-  s2 <- generaSubst (aplicaSubst s1 t_suposat) t_cos
+  s2 <- generaSubst t_suposat t_cos
   
   -- 4. Ajuntem totes les substitucions i retornem el tipus final corregit
   let sTotal = s2 ++ s1

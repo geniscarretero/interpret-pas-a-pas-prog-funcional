@@ -1,0 +1,166 @@
+Nom del test: ./tests/test_ast.hs
+
+
+:a 123
+:a 12 + 1
+:a (\x -> x + 1)
+:a (\x y -> x + y)
+:a (\x -> x*3) 6
+:a 1
+:a const True
+:a True
+:a (\x -> x < 10)
+:a (.) (\x -> x*3)
+
+Nom del test: ./tests/test_eval_0.hs
+
+
+aplicaMult f a i = if i == 0 then a else f (aplicaMult f a (i-1))
+
+aplicaMult (\x -> x + 1) 0 5
+
+Nom del test: ./tests/test_eval_10.hs
+
+
+factorial n acc = if (==) n 0 then acc else factorial ((-) n 1) ((*) n acc)
+
+factorial 5 1
+
+Nom del test: ./tests/test_eval_11.hs
+
+
+aplicaVegades n f x = if (==) n 0 then x else aplicaVegades ((-) n 1) f (f x)
+
+aplicaVegades 3 (\y -> (*) y 2) 5
+
+Nom del test: ./tests/test_eval_1.hs
+
+
+ombra x = (\x -> (+) x 2) ((*) x 3)
+
+ombra 5
+
+Nom del test: ./tests/test_eval_2.hs
+
+
+sumaTres x y z = (+) x ((+) y z)
+sumaDeu = sumaTres 4 6
+
+sumaDeu 5
+
+Nom del test: ./tests/test_eval_3.hs
+
+
+creaMultiplicador x = \y -> (*) x y
+perCinc = creaMultiplicador 5
+
+perCinc 4
+
+Nom del test: ./tests/test_eval_4.hs
+
+
+dinsRang min max x = (x >= min) && (x <= max)
+dinsRang 10 20 15
+
+Nom del test: ./tests/test_eval_5.hs
+
+
+bucle x = bucle x
+mandra x = if (==) x 0 then 42 else bucle x
+
+mandra 0
+
+Nom del test: ./tests/test_eval_6.hs
+
+
+identitat x = x
+testPolimorfisme = if (identitat True) then (identitat 42) else (identitat 0)
+
+testPolimorfisme
+
+Nom del test: ./tests/test_eval_7.hs
+
+
+f x = \y -> \z -> (+) x ((+) y z)
+tancament = f 10 20
+
+tancament 5
+
+Nom del test: ./tests/test_eval_8.hs
+
+
+omega x = omega x
+constant x y = x
+
+constant 99 (omega 0)
+
+Nom del test: ./tests/test_eval_9.hs
+
+
+extrem = (\x -> (\x -> x) ((+) x 1)) 5
+
+extrem
+
+Nom del test: ./tests/test_type.hs
+
+
+:t id True
+:t id id
+:t const 5 True
+:t const id 1
+
+:t (.) not (const False)
+:t (.) id id
+:t (.) (\x -> x + 1) (\y -> y * 2)
+:t (.) (\b -> not b) (\x -> x > 5)
+
+:t (\f x -> f (f x))
+:t (\f x -> f (f x)) (\n -> n + 1)
+:t (\f x -> f (f x)) not
+
+:t (\x -> (x + 1) > 0)
+:t (\x y -> (x == y) && (x > 0))
+
+:t (\x -> (\x -> x > 0) (x + 1))
+:t (\f x -> f (x == 5))
+
+:t 1 + True
+:t not 5
+:t id 1 2
+:t (.) not not 5
+
+-- Pattern matching
+:t (\1 -> True)
+:t (\True -> 123)
+:t (\1 -> 1+1)
+
+-- ==========================================
+-- === NOUS TESTS NEGATIUS (Sense :t) =======
+-- ==========================================
+
+-- 1. Variables no lligades (Unbound variables)
+variableFantasma
+(\x -> x + y) 5
+
+-- 2. Error d'ocurrència / Tipus infinit (Occurs check)
+-- L'inferidor no hauria de poder unificar la 'x' amb el tipus de 'x x'
+\x -> x x
+(\f -> f f) (\x -> x)
+
+-- 3. Errors de Tipus (Type Mismatches) directes
+-- Intentar utilitzar un enter com a condició
+if 42 then 1 else 0
+
+-- Les branques de l'If retornen tipus diferents (Int vs Bool)
+if True then 1 else False
+
+-- Intentar aplicar un valor no funcional com si fos una funció
+True 5
+(1 + 2) 3
+
+-- Passar l'argument incorrecte a una lambda
+(\x -> x && False) 10
+
+-- 4. Errors en temps d'execució (si el teu llenguatge té divisió)
+10 / 0
+

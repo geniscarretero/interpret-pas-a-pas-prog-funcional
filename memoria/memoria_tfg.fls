@@ -1186,6 +1186,8 @@ INPUT memoria_tfg.toc
 INPUT memoria_tfg.toc
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmr12.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmti12.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmtt12.tfm
 OUTPUT memoria_tfg.toc
 INPUT ./capitols/GEP.tex
 INPUT ./capitols/GEP.tex
@@ -1198,10 +1200,8 @@ INPUT capitols/GEP.tex
 INPUT ./capitols/GEP.tex
 INPUT capitols/GEP.tex
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbx12.tfm
-INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmti12.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcrm1200.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc
-INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmtt12.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/jknappen/ec/tcbx1200.tfm
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbxti10.tfm
 INPUT /usr/share/texlive/texmf-dist/tex/latex/R/omscmtt.fd
@@ -1230,6 +1230,7 @@ INPUT /usr/share/texlive/texmf-dist/tex/latex/listings/lstlang2.sty
 INPUT /usr/share/texlive/texmf-dist/tex/latex/listings/lstlang2.sty
 INPUT /usr/share/texlive/texmf-dist/tex/latex/listings/lstlang2.sty
 INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmtt10.tfm
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmbxti10.tfm
 INPUT ./capitols/tipus.tex
 INPUT ./capitols/tipus.tex
 INPUT ./capitols/tipus.tex
@@ -1260,6 +1261,7 @@ INPUT ./capitols/resultats.tex
 INPUT capitols/resultats.tex
 INPUT ./capitols/resultats.tex
 INPUT capitols/resultats.tex
+INPUT /usr/share/texlive/texmf-dist/fonts/tfm/public/cm/cmtt12.tfm
 INPUT ./capitols/conclusions.tex
 INPUT ./capitols/conclusions.tex
 INPUT ./capitols/conclusions.tex

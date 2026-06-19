@@ -7,61 +7,96 @@ Per tal d'il·lustrar de manera didàctica i cohesiva el funcionament intern del
     \texttt{(\textbackslash x y -> x * y) 2 3}
 \end{center}
 
-En aquest capítol, s'exposa com aquesta seqüència de caràcters es transforma en una estructura dades arbòria que reflecteix la semàntica formal del llenguatge.
+En aquest capítol, s'exposa com aquesta seqüència de caràcters es transforma en una estructura de dades arbòria que reflecteix la semàntica formal del llenguatge.
 
-\section{Disseny de la gramàtica}
-L'objectiu primer d'aquesta fase és construir una representació abstracta en forma d'arbre (AST, \textit{Abstract Syntax Tree}) de qualsevol expressió subministrada per l'usuari. La gramàtica suportada s'ha dissenyat imitant un subconjunt essencial del llenguatge Haskell i del Càlcul Lambda clàssic, prenent com a fonament teòric el model de transformació sintàctica exposat per Peyton Jones \cite{peyton1987implementation}.
+\section{Disseny de la Gramàtica i l'Arbre de Sintaxi Abstracta}
 
-Com es pot observar, l'expressió guia conté la pràctica totalitat dels elements sintàctics que el parser és capaç de reconèixer de manera nativa:
-\begin{itemize}
-    \item \textbf{Abstraccions Lambda Multiargument:} Definicions anònimes de funcions mitjançant la sintaxi \texttt{\textbackslash x y -> ...}. Com s'analitzarà més endavant, el parser s'encarrega de desugarejar aquesta construcció en abstraccions niuades d'un sol argument.
-    \item \textbf{Valors literals i Variables:} Identificadors numèrics enters (\texttt{2} i \texttt{3}) i variables alfanumèriques en minúscula (\texttt{x} i \texttt{y}).
-    \item \textbf{Operadors infixos:} Operacions aritmètiques primitives primàries, en aquest cas la multiplicació (\texttt{*}), a més de suportar addició (\texttt{+}), substracció (\texttt{-}) i divisió (\texttt{/}).
-    \item \textbf{Aplicació de funcions:} L'acció de passatge d'arguments (\texttt{2} i \texttt{3}) a l'abstracció, denotada simplement per la juxtaposició d'expressions (espais en blanc).
-\end{itemize}
-Més enllà dels elements presents a l'expressió guia, el disseny s'estén per donar suport a estructures de control condicionals (\texttt{if-then-else}), operadors de comparació relacionals (\texttt{<}, \texttt{<=}, \texttt{>}, \texttt{>=}, \texttt{==}) i lògics (\texttt{||}, \texttt{\&\&}), així com l'omissió sintàctica de comentaris unillínia (\texttt{--}).
+L'objectiu primer d'aquesta fase és construir una representació abstracta en forma d'arbre (AST, \textit{Abstract Syntax Tree}) de qualsevol codi subministrat per l'usuari. El tipus de dades algebraic central que governa el nucli del llenguatge és \texttt{Expr}, definit al mòdul \texttt{HSTipus}:
 
-\section{Implementació del Parser}
+\begin{lstlisting}[style=haskellstyle, caption=Definició del tipus algebraic d'expressions (Expr)]
+data Expr = Val Int                 
+          | Var String              
+          | App Expr Expr           
+          | Lam String Expr       
+          | If Expr Expr Expr
+          deriving (Show,Eq)
+\end{lstlisting}
 
-\subsection{Combinadors de Parsers Monàdics}
-Seguint l'estratègia funcional clàssica, un parser s'estructura com una funció que rep una cadena de text (\texttt{String}) i en consumeix un prefix vàlid, retornant una llista de parells que contenen el valor semàntic extret i el fragment restant de la cadena sense analitzar. Una llista buida denota un error de parsatge. El tipus s'encapsula sota un nou tipus de dades monàdic:
+\subsection{Suficiència Teòrica del Nucli d'Expressions}
+Aquest conjunt de cinc nodes és minimalista però completament suficient per formalitzar un llenguatge de programació funcional complet. El fonament teòric d'aquesta suficiència se sustenta en l'estratègia exposada per Simon Peyton Jones \cite{peyton1987implementation}, on es defensa que un llenguatge funcional d'alt nivell s'ha de traduir i reduir a un \textbf{Càlcul Lambda Enriquit} (\textit{Enriched Lambda Calculus}) abans de ser executat. 
+
+El Càlcul Lambda pur només necessita tres constructors fonamentals: variables (\texttt{Var}), abstraccions (\texttt{Lam}) i aplicacions (\texttt{App}), els quals defineixen un sistema Turing complet capaç de modelar qualsevol tipus de dada mitjançant codificacions estructurals. No obstant això, tal com argumenta Peyton Jones \cite{peyton1987implementation}, per motius d'eficiència pràctica de l'intèrpret s'estén aquest nucli amb constants primitives (\texttt{Val Int}) i estructures de control de flux primitives (\texttt{If Expr Expr Expr}). Els operadors aritmètics i lògics (com \texttt{*} o \texttt{+}) no requereixen nodes especialitzats a l'AST; es tracten formalment com a variables (\texttt{Var}) el tipus funcional de les quals es troba predefinit a l'entorn global o \textit{Prelude}, d'acord amb el model de funcions primitives integrades descrit a \cite{peyton1987implementation}.
+
+\subsection{El Tractament de la Recursivitat mitjançant Supercombinadors}
+Un detall de disseny crucial heretat de les tesis de Peyton Jones \cite{peyton1987implementation} és l'absència d'un node de recursivitat dedicat dins de \texttt{Expr} (com podria ser un constructor \texttt{LetRec} local o un operador de punt fix \texttt{Fix}). 
+
+En el nostre intèrpret, la recursivitat no es gestiona a nivell d'expressió pura, sinó a nivell global mitjançant la transformació del programa en \textbf{Supercombinadors}. Quan el parser detecta definicions de funcions recursives, les lliga a l'entorn de declaracions. Més endavant, el motor de l'intèrpret tradueix aquestes declaracions en supercombinadors globals on els cicles i l'auto-referència es resolen mitjançant la instanciació de punters de cicle directes en el \textit{heap}, evitant la necessitat d'introduir constructs complexos de fixació local a l'AST durant la inferència de tipus.
+
+\section{L'Abstracció de Declaracions (\textit{Bindings})}
+
+Un programa real no és només una expressió aïllada; es compon d'un conjunt de definicions globals, de vegades recursives, seguides de l'expressió que es vol avaluar. Per modelar aquesta estructura, el parser introdueix els conceptes de \texttt{Binding} i els combinadors de nivell superior \texttt{program} i \texttt{line}.
+
+\begin{lstlisting}[style=haskellstyle, caption=Estructures d'enllaç i flux del programa]
+data Binding = Bind String Expr deriving (Show)
+type Program = ([Binding], Expr)
+\end{lstlisting}
+
+El combinador \texttt{binding} realitza el procés clàssic de \textbf{desugarejament} (\textit{desugaring}) fonamental per transformar el codi amigable d'estil Haskell cap al nucli del Càlcul Lambda Enriquit \cite{peyton1987implementation}. Permet dues estructures clau:
+
+\begin{enumerate}
+    \item \textbf{Definicions Estàndard Multiargument:} Permet escriure definicions lineals com \texttt{suma x y = x + y}. El parser extreu la llista de variables d'argument i utilitza la funció local \texttt{lambdifica} per niar dinàmicament constructors \texttt{Lam}. L'expressió es converteix internament en \texttt{Bind "suma" (Lam "x" (Lam "y" (...)))}. Aquest desugarejament d'arguments en cascada és la implementació directa de la transformació sintàctica formal formalitzada per Peyton Jones al capítol de traducció d'estructures algèbriques \cite{peyton1987implementation}.
+    \item \textbf{Guàrdies Sintàctiques (\textit{Guards}):} Permet definicions basades en condicions alternatives mitjançant el caràcter \texttt{|}. El combinador absorbeix seqüencialment els fragments de text mitjançant \texttt{guardElement} i el cas de tancament obligatori \texttt{otherwise}. Llavors, utilitzant la funció \texttt{ififica}, transforma aquesta llista de parells \textit{(condició, resultat)} en un niu ordenat i seqüencial d'expressions \texttt{If} equivalents, seguint escrupolosament l'algorisme de traducció de guàrdies descrit a \cite{peyton1987implementation}.
+\end{enumerate}
+
+\section{Implementació de l'Arquitectura del Parser}
+
+\subsection{Combinadors de Parsers Monàdics Primitius}
+Un parser s'estructura conceptualment com una funció que rep una cadena de text (\texttt{String}) i en consumeix un prefix vàlid, retornant una llista de parells amb el valor semàntic extret i el fragment restant de la cadena sense analitzar:
 
 \begin{lstlisting}[style=haskellstyle, caption=Definició monàdica del tipus Parser]
 newtype Parser a = Parser {parse :: String -> [(a, String)]}
 \end{lstlisting}
 
-Aquesta abstracció expressa la seva màxima potència formal mitjançant la instanciació de les classes de tipus estructurals de Haskell: \texttt{Functor}, \texttt{Applicative} i \texttt{Monad}. La instanciació de \texttt{Monad} fa ús de llistes per compressió per modelar el no-determinisme i el flux de dades de manera elegant. Això permet que combinadors primitius de caràcters (com \texttt{sat}, \texttt{digit} o \texttt{lletra}) s'encadenin de manera seqüencial. 
+Per entendre com s'erigeix l'estructura del parser, és imprescindible analitzar els combinadors monàdics més bàsics de la implementació, els quals actuen com els maons primitius de l'edifici sintàctic:
 
-Per altra banda, la implementació de la classe \texttt{Alternative} mitjançant la funció d'elecció prioritzada \texttt{or'} (operador \texttt{<|>}) dota el sistema de capacitat de \textit{backtracking}. Això es fa evident en els combinadors de repetició \texttt{mul} (zero o més vegades) i \texttt{mes} (una o més vegades), que miren de consumir text recursivament i, en cas de fallida, reverteixen el consum oferint una alternativa buida:
+\begin{lstlisting}[style=haskellstyle, caption=Combinadors monàdics primitius item i sat]
+item :: Parser Char
+item = Parser parseItem
+  where
+    parseItem [] = []
+    parseItem (x : xs) = [(x, xs)]
 
-\begin{lstlisting}[style=haskellstyle, caption=Combinadors de repetició mul i mes]
-mul :: Parser a -> Parser [a]
-mul p = do
-  x  <- p
-  xs <- mul p
-  return (x : xs)
-  <|> return []
-
-mes :: Parser a -> Parser [a]
-mes p = do x <- p; xs <- mul p; return (x : xs)
+sat :: (Char -> Bool) -> Parser Char
+sat p = item >>= \x -> if p x then result x else zero
 \end{lstlisting}
 
-Gràcies a aquesta construcció \textit{bottom-up}, combinadors complexos com \texttt{intToken} (que absorbeix espais adjacents abans i després d'un dígit utilitzant el combinador \texttt{token}) es construeixen de manera altament declarativa.
+El combinador \texttt{item} és l'atòmic: consumeix incondicionalment el primer caràcter de la cadena. La veritable potència de la mònada es visualitza a \texttt{sat} (satisfar). Aquest combinador utilitza l'operador d'enllaç monàdic (\texttt{>>=}) per extraure el caràcter programat per \texttt{item} (anomenat \texttt{x}) i passar-lo a una funció de decisió en temps d'execució. Si el predicat \texttt{p x} és cert, retorna el caràcter encapsulat amb \texttt{result}; si falla, retorna \texttt{zero} (la llista buida, representant la fallida del \textit{backtracking}).
+A partir d'aquesta composició monàdica elemental, es construeixen per abstracció combinadors funcionals d'alt nivell sense haver de tornar a manipular manualment l'estat de la cadena de text:
 
-\subsection{Gestió de Precedència i Associativitat i Jerarquia Sintàctica}
-El repte de dissenyar una gramàtica per a expressions funcionals rau en l'ambigüitat inherent de les operacions infixes i les aplicacions juxtaposades. Per resoldre la \textbf{precedència d'operadors} sense recórrer a una taula de parsing externa, s'ha estructurat el parser com un descens sintàctic jeraquitzat reflectit en el flux de crides de les funcions.
+\begin{lstlisting}[style=haskellstyle, caption=Derivació de parsers de caràcters per abstracció]
+digit :: Parser Char
+digit = sat isDigit
 
-L'arrel de l'anàlisi és el combinador \texttt{expr}, el qual delega el control seguint un ordre estrictament creixent de precedència (de menys a més prioritat):
+lletra :: Parser Char
+lletra = sat isLetter
+\end{lstlisting}
+
+Aquesta elegància declarativa s'estén a la instanciació de la classe \texttt{Alternative} (mitjançant l'operador \texttt{<|>}), que dota el sistema de la capacitat de tria prioritzada i recuperació d'errors. Els combinadors de repetició \texttt{mul} (zero o més vegades) i \texttt{mes} (una o més vegades) fan ús d'aquesta propietat per absorbir llistes de tokens recursivament.
+
+\subsection{Gestió de Precedència i Jerarquia Sintàctica}
+El repte de dissenyar una gramàtica per a expressions funcionals rau en l'ambigüitat inherent de les operacions infixes i les aplicacions juxtaposades. Per resoldre la \textbf{precedència d'operadors} sense recórrer a una taula de parsing externa o generadors complexos de tipus LR, s'ha seguit l'esquema de descens sintàctic jerarquitzat recomanat per Peyton Jones per a l'arquitectura de compiladors funcionalistes \cite{peyton1987implementation}.
+
+L'arrel de l'anàlisi de qualsevol expressió és el combinador \texttt{expr}, el qual delega el control seguint un ordre estrictament creixent de precedència (de menys a més prioritat):
 \begin{center}
-\texttt{expr} $\rightarrow$ \texttt{lam} / \texttt{ifThenElse} $\rightarrow$ \texttt{logicOr} $\rightarrow$ \texttt{logicAnd} $\rightarrow$ \texttt{comp} $\rightarrow$ \texttt{suma} $\rightarrow$ \texttt{term} $\rightarrow$ \texttt{ap} $\rightarrow$ \texttt{atom}
+\texttt{expr} $\rightarrow$ \texttt{lam} / \texttt{ifThenElse} $\rightarrow$ \texttt{operator} $\rightarrow$ \texttt{logicOr} $\rightarrow$ \texttt{logicAnd} $\rightarrow$ \texttt{comp} $\rightarrow$ \texttt{suma} $\rightarrow$ \texttt{term} $\rightarrow$ \texttt{ap} $\rightarrow$ \texttt{atom}
 \end{center}
 
-D'aquesta manera, l'operació multiplicativa \texttt{x * y} present en el cos de la nostra expressió guia és reconeguda pel combinador \texttt{term}, ramificant correctament l'AST abans que operacions de menor precedència com les sumes puguin capturar erròniament els operands. Així mateix, l'ús de la llista de \texttt{paraulesProhibides} prevé que els tokens estructurals de control (\texttt{if}, \texttt{then}, \texttt{else}) siguin erròniament absorbits com a simples identificadors lineals per part de \texttt{nomVariable}.
+D'aquesta manera, l'operació multiplicativa \texttt{x * y} present en el cos de la nostra expressió guia és reconeguda pel combinador \texttt{term}, ramificant correctament l'AST abans que operacions de menor precedència com les sumes puguin capturar erròniament els operands, garantint l'arbre correcte descrit a \cite{peyton1987implementation}.
 
 \subsection{Aplicació de Funcions i Currificació}
-Com assenyala Peyton Jones \cite{peyton1987implementation}, l'aplicació de funcions en els llenguatges de la família de les línies del Càlcul Lambda és \textbf{associativa per l'esquerra}. L'expressió guia \texttt{(\textbackslash x y -> x * y) 2 3} no representa una funció rebent un vector de dos arguments, sinó que conceptualment s'agrupa com \texttt{((\textbackslash x y -> x * y) 2) 3}.
+Com assenyala explícitament Peyton Jones \cite{peyton1987implementation}, l'aplicació de funcions en els llenguatges de la família del Càlcul Lambda és \textbf{associativa per l'esquerra}. L'expressió guia \texttt{(\textbackslash x y -> x * y) 2 3} no representa una funció rebent un vector de dos arguments, sinó que conceptualment s'agrupa obligatòriament com \texttt{((\textbackslash x y -> x * y) 2) 3}.
 
-El combinador \texttt{ap} resol aquesta propietat geomètrica recollint primer un àtom base i acumulant en una llista un nombre indeterminat d'àtoms adjacents (\texttt{ys <- mul atom}). La funció interna \texttt{insert} aplica una reducció estructural per l'esquerra (\textit{left-fold}), anidant nodes constructors \texttt{App} des dels elements inicials del flux:
+El combinador \texttt{ap} resol aquesta propietat geomètrica recollint primer un àtom base i acumulant en una llista un nombre indeterminat d'àtoms adjacents (\texttt{ys <- mul atom}). La funció interna \texttt{insert} aplica una reducció estructural per l'esquerra (\textit{left-fold}), anidant nodes constructors \texttt{App} de manera asimètrica:
 
 \begin{lstlisting}[style=haskellstyle, caption=Associativitat per l'esquerra en el combinador d'aplicació]
 ap :: Parser Expr
@@ -75,12 +110,12 @@ ap = do
             insert exprs = (App (insert (init exprs)) (last exprs))
 \end{lstlisting}
 
-En contraposició, el combinador \texttt{lam} realitza l'operació inversa per a la definició de paràmetres: agrupa els identificadors de variables associant cap a la \textbf{dreta}. Així, la subexpressió \texttt{\textbackslash x y -> x * y} es desugareja automàticament durant el parsatge com a dues lambdes pures imbricades: \texttt{Lam "x" (Lam "y" (...))}.
+En contraposició, tal com dicta la sintaxi clàssica de Peyton Jones \cite{peyton1987implementation}, el combinador \texttt{lam} realitza l'operació inversa per a la definició de paràmetres: agrupa els identificadors de variables associant cap a la \textbf{dreta}. Així, la subexpressió \texttt{\textbackslash x y -> x * y} es desugareja automàticament durant el parsatge com a dues lambdes pures imbricades: \texttt{Lam "x" (Lam "y" (...))}.
 
 \section{Arbre de Sintaxi Abstracta Resultant}
 Una vegada el combinador final de la jerarquia ha consumit la totalitat de la cadena de caràcters de l'expressió guia, el parser retorna el corresponent Arbre de Sintaxi Abstracta (AST). 
 
-Com es pot apreciar detalladament a la Figura \ref{fig:ast_or}, la semàntica de la currificació esdevé perfectament visible en l'estructura de dades resultant: els nodes d'aplicació (\texttt{App}) s'apilen asimètricament cap a l'esquerra, col·locant l'argument terminal \texttt{Val 3} com a fill d'un node arrel que enllaça amb l'aplicació parcial prèvia. Aquesta fita clou la fase sintàctica i dota l'intèrpret de la representació formal requerida per al posterior mòdul d'inferència de tipus.
+Com es pot apreciar detalladament a la Figura \ref{fig:ast_or}, la semàntica de la currificació teòrica defensada a \cite{peyton1987implementation} esdevé perfectament visible en l'estructura de dades resultant: els nodes d'aplicació (\texttt{App}) s'apilen asimètricament cap a l'esquerra, col·locant l'argument terminal \texttt{Val 3} com a fill d'un node arrel que enllaça amb l'aplicació parcial prèvia. Aquesta fita clou la fase sintàctica i dota l'intèrpret de la representació formal requerida per al posterior mòdul d'inferència de tipus.
 
 \begin{figure}[h]
     \centering

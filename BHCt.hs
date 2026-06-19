@@ -38,7 +38,7 @@ output (Just input) m typeEnv defEnv typeNum=
             then return ("", typeEnv, defEnv, typeNum)
             else return ("Error:\n" ++ input ++ "\n^--- El parser ha parat aquí", typeEnv, defEnv, typeNum)
         [(res, "")] ->
-            case infereix (HM.toList typeEnv) res typeNum of
+            case infereix (HM.toList typeEnv) (HM.toList typeEnv) res typeNum of
               Left text -> return (text, typeEnv, defEnv, typeNum)
               Right (t, _, newTypeNum) -> return ((showTipus t), typeEnv, defEnv, newTypeNum)
         [(res, rest)] -> (do 
@@ -52,7 +52,7 @@ output (Just input) m typeEnv defEnv typeNum=
             else return ("Error:\n" ++ input ++ "\n^--- El parser ha parat aquí", typeEnv, defEnv, typeNum)
         [(res, "")] -> 
             case res of
-              Left e -> case infereix (HM.toList typeEnv) e typeNum of
+              Left e -> case infereix (HM.toList typeEnv) (HM.toList typeEnv) e typeNum of
                 Left text -> return (text, typeEnv, defEnv, typeNum) 
                 Right (_, _, newTypeNum) -> 
                   case e of
@@ -76,9 +76,9 @@ output (Just input) m typeEnv defEnv typeNum=
                         Right ((a1,hs1), trace) -> return ((foldl (\x y -> x ++ y++ "\n") "" trace), typeEnv, defEnv, newTypeNum)
                       )
               Right (Bind str e) -> 
-                case infereixDefRec (HM.toList typeEnv) str e typeNum of
+                case infereixDefRec (HM.toList typeEnv) (HM.toList typeEnv) str e typeNum of
                   Left text -> return (text, typeEnv, defEnv, typeNum)
-                  --Right (t, _, _) -> return ("typeEnv:\n"++show (HM.insert str t typeEnv)++ "\ndefEnv\n" ++ show (HM.insert str (FuncDef e) defEnv) ++ "\n" , (HM.insert str t typeEnv), (HM.insert str (FuncDef e) defEnv) )
+                  --Right (t, _, newTypeNum) -> return ("typeEnv:\n"++show (HM.insert str t typeEnv)++ "\ndefEnv\n" ++ show (HM.insert str (FuncDef e) defEnv) ++ "\n" , (HM.insert str t typeEnv), (HM.insert str (FuncDef e) defEnv), newTypeNum )
                   Right (t, _, newTypeNum) -> return ("" , (HM.insert str t typeEnv), (HM.insert str (FuncDef e) defEnv), newTypeNum )
         [(res, rest)] -> (do 
             let pos = length input - length rest

@@ -27,3 +27,33 @@
 :t (\1 -> True)
 :t (\True -> 123)
 :t (\1 -> 1+1)
+
+-- ==========================================
+-- === NOUS TESTS NEGATIUS (Sense :t) =======
+-- ==========================================
+
+-- 1. Variables no lligades (Unbound variables)
+variableFantasma
+(\x -> x + y) 5
+
+-- 2. Error d'ocurrència / Tipus infinit (Occurs check)
+-- L'inferidor no hauria de poder unificar la 'x' amb el tipus de 'x x'
+\x -> x x
+(\f -> f f) (\x -> x)
+
+-- 3. Errors de Tipus (Type Mismatches) directes
+-- Intentar utilitzar un enter com a condició
+if 42 then 1 else 0
+
+-- Les branques de l'If retornen tipus diferents (Int vs Bool)
+if True then 1 else False
+
+-- Intentar aplicar un valor no funcional com si fos una funció
+True 5
+(1 + 2) 3
+
+-- Passar l'argument incorrecte a una lambda
+(\x -> x && False) 10
+
+-- 4. Errors en temps d'execució (si el teu llenguatge té divisió)
+10 / 0

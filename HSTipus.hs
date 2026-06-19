@@ -7,7 +7,7 @@ data Expr = Val Int                 -- Un número (42)
           | App Expr Expr           -- Aplicació de funció (f x)
           | Lam String Expr       -- Funció lambda (\x -> x + 1)
           | If Expr Expr Expr
-          deriving (Show)
+          deriving (Show,Eq)
 
 data Binding = Bind String Expr deriving (Show)
 
@@ -43,7 +43,7 @@ data Tipus = TInt
            | TBool
            | TFun Tipus Tipus
            | TVar String
-           deriving (Show)
+           deriving (Show,Eq)
 
 showTipus :: Tipus -> String
 showTipus TInt = "Int"

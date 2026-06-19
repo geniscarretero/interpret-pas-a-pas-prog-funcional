@@ -134,69 +134,71 @@ isWHNF (a, (aa,hp)) typeEnv =
 -- Precondicions:
 -- les adreces ja ho tenen tot avaluat en 
 
-compute :: Primitive -> [Addr] -> HeapState -> Expr
+compute :: Primitive -> [Addr] -> HeapState -> Either String Expr
 compute Plus [a1, a2] (aa,hp) =
   let
     Just (NVal n1) = IM.lookup a1 hp
     Just (NVal n2) = IM.lookup a2 hp
   in 
-    Val (n1+n2)
+    Right(Val (n1+n2))
 
 compute Minus [a1, a2] (aa,hp) =
   let
     Just (NVal n1) = IM.lookup a1 hp
     Just (NVal n2) = IM.lookup a2 hp
   in 
-    Val (n1-n2)
+    Right(Val (n1-n2))
 
 compute Mult [a1, a2] (aa,hp) =
   let
     Just (NVal n1) = IM.lookup a1 hp
     Just (NVal n2) = IM.lookup a2 hp
   in 
-    Val (n1*n2)
+    Right(Val (n1*n2))
 
 compute Div [a1, a2] (aa,hp) =
   let
     Just (NVal n1) = IM.lookup a1 hp
     Just (NVal n2) = IM.lookup a2 hp
   in 
-    Val (div n1 n2)
+    if n2 == 0 then Left ("Divisió entre 0")
+      else 
+    Right(Val (div n1 n2))
 
 compute Eq [a1, a2] (aa,hp) =
   let
     Just expr1 = IM.lookup a1 hp
     Just expr2 = IM.lookup a2 hp
   in 
-    Var (if expr1==expr2 then "True" else "False")
+    Right(Var (if expr1==expr2 then "True" else "False"))
 
 compute Lt [a1, a2] (aa,hp) =
   let
     Just (NVal n1) = IM.lookup a1 hp
     Just (NVal n2) = IM.lookup a2 hp
   in 
-    Var (if n1<n2 then "True" else "False")
+    Right(Var (if n1<n2 then "True" else "False"))
 
 compute Lte [a1, a2] (aa,hp) =
   let
     Just (NVal n1) = IM.lookup a1 hp
     Just (NVal n2) = IM.lookup a2 hp
   in 
-    Var (if n1<=n2 then "True" else "False")
+    Right(Var (if n1<=n2 then "True" else "False"))
 
 compute Gt [a1, a2] (aa,hp) =
   let
     Just (NVal n1) = IM.lookup a1 hp
     Just (NVal n2) = IM.lookup a2 hp
   in 
-    Var (if n1>n2 then "True" else "False")
+    Right(Var (if n1>n2 then "True" else "False"))
 
 compute Gte [a1, a2] (aa,hp) =
   let
     Just (NVal n1) = IM.lookup a1 hp
     Just (NVal n2) = IM.lookup a2 hp
   in 
-    Var (if n1>=n2 then "True" else "False")
+    Right(Var (if n1>=n2 then "True" else "False"))
 
 compute And [a1, a2] (aa,hp) =
   let
@@ -205,7 +207,7 @@ compute And [a1, a2] (aa,hp) =
     b1 = read n1 :: Bool
     b2 = read n2 :: Bool
   in 
-    Var (if b1 && b2 then "True" else "False")
+    Right(Var (if b1 && b2 then "True" else "False"))
 
 compute Or [a1, a2] (aa,hp) =
   let
@@ -214,7 +216,7 @@ compute Or [a1, a2] (aa,hp) =
     b1 = read n1 :: Bool
     b2 = read n2 :: Bool
   in 
-    Var (if b1 || b2 then "True" else "False")
+    Right(Var (if b1 || b2 then "True" else "False"))
 
 
 -- Un pas en el procés d'avaluar
@@ -248,7 +250,10 @@ pas (a, (aa,hp)) typeEnv defEnv stk =
 
       in Right (aa1,newHp)
       ) 
-    NVar s -> (
+    NVar s -> 
+      if s == "False" || s == "True" then Left "Aplicació no vàlida"
+        else
+      (
       case HM.lookup s defEnv of 
         Just code -> (case code of 
           PrimDef opt arity -> (
@@ -267,17 +272,20 @@ pas (a, (aa,hp)) typeEnv defEnv stk =
                     else 
                     (
                       -- Els dos estan en WHNF suposadament seràn o numeros o True/False
-                      let 
-                        (addrNew, (aa1,hp1)) = ast2graph (compute opt [p1,p2] (aa, hp)) (aa,hp) []
-                        -- Un cop creat el graph:
-                        -- el que apuntava a app1 ha d'apuntar a aquest nou graph
-                        Just contingut = IM.lookup addrNew hp1
-                        -- Per tant: eliminar app1, app2 i addrnew
-                        -- No puc eliminar fills app1 i app2 pq no sé si es tornen a utilitzar (implementar gc en IM)
-                        -- substituir app2 amb contingut nou
-                        newHp = IM.insert app2 contingut hp1
-                      in 
-                        Right (aa1,newHp) -- Pas fet
+                      case compute opt [p1, p2] (aa,hp) of 
+                        Right result ->
+                          let
+                            (addrNew, (aa1,hp1)) = ast2graph result (aa,hp) []
+                            -- Un cop creat el graph:
+                            -- el que apuntava a app1 ha d'apuntar a aquest nou graph
+                            Just contingut = IM.lookup addrNew hp1
+                            -- Per tant: eliminar app1, app2 i addrnew
+                            -- No puc eliminar fills app1 i app2 pq no sé si es tornen a utilitzar (implementar gc en IM)
+                            -- substituir app2 amb contingut nou
+                            newHp = IM.insert app2 contingut hp1
+                          in 
+                            Right (aa1,newHp) -- Pas fet
+                        Left text -> Left text
                     )
                   )
             )
@@ -292,7 +300,7 @@ pas (a, (aa,hp)) typeEnv defEnv stk =
           )
         Nothing -> Left "Variable no trobada" 
         )
-    NVal _ -> Right (aa,hp) -- Hauria de petar
+    NVal _ -> Left ("Aplicació no vàlida") -- Hauria de petar
     NApp a1 a2 -> pas (a1, (aa,hp)) typeEnv defEnv (a:stk)
     NIf a1 a2 a3 -> if not (isWHNF (a1,(aa,hp)) typeEnv) 
       then pas (a1, (aa, hp)) typeEnv defEnv []

@@ -1,4 +1,50 @@
 \chapter{Resultats i Proves}
+
+En aquest capítol es descriu l'estratègia de validació utilitzada per comprovar la correcció tant de l'analitzador sintàctic (AST) com dels mòduls d'inferència de tipus i d'execució de supercombinadors. Per fer-ho, s'ha dissenyat una bateria de tests estructurada en fitxers independents que exploren els límits del llenguatge.
+
 \section{Bateria de Tests d'Inferència}
+
+La validació del sistema de tipus s'ha dividit en dues fases clarament diferenciades mitjançant els fitxers \texttt{test\_ast.hs} i \texttt{test\_type.hs}: la comprovació de la correcta generació de l'arbre de sintaxi abstacta (AST) i la resolució de tipus mitjançant l'algorisme de Hindley-Milner.
+
+\subsection{Verificació de l'AST (\texttt{test\_ast.hs})}
+Aquesta primera línia de proves utilitza la comanda \texttt{:a} per assegurar que les expressions constants, operacions aritmètiques, abstraccions lambda i aplicacions parcials es parsegen creant l'estructura de nodes esperada. S'inclouen expressions com:
+\begin{itemize}
+    \item \textbf{Primitives i Operacions:} \texttt{123}, \texttt{12 + 1} i constants booleanes (\texttt{True}).
+    \item \textbf{Lambdes i Ordre Superior:} Abstraccions simples (\texttt{\textbackslash x -> x + 1}), multi-argument (\texttt{\textbackslash x y -> x + y}) i la composició de funcions (\texttt{(.) (\textbackslash x -> x*3)}).
+\end{itemize}
+
+\subsection{Inferència Exitosa i Polimorfisme (\texttt{test\_type.hs})}
+Mitjançant la comanda \texttt{:t}, es posa a prova la capacitat de l'inferidor per gestionar el polimorfisme paramètric (\emph{Let-Polymorphism}) i les funcions d'ordre superior:
+\begin{itemize}
+    \item \textbf{Instanciació múltiple:} Es valida que funcions com \texttt{id} o \texttt{const} es puguin usar amb diferents tipus en un mateix entorn (\texttt{id True} en front de \texttt{id id}) sense unificar erròniament les seves variables de tipus genèriques.
+    \item \textbf{Composició de funcions:} Es resol el tipus de l'operador composició \texttt{(.)} combinat amb funcions booleanes (\texttt{not}) i aritmètiques.
+\end{itemize}
+
+\subsection{Tests Negatius i Robustesa}
+Per garantir que l'intèrpret no es deté abruptament davant de codi erroni, s'han inclòs casos de prova dissenyats per fallar i llançar excepcions controlades:
+\begin{itemize}
+    \item \textbf{Variables no lligades:} L'ús de \texttt{variableFantasma} o variables lliures en lambdes (\texttt{\textbackslash x -> x + y}) és capturat correctament per l'entorn de noms.
+    \item \textbf{Test d'Ocurrència (\emph{Occurs Check}):} Expressions clàssiques del Càlcul Lambda pur com \texttt{\textbackslash x -> x x} forçarien un tipus infinit. El sistema ho detecta i evita el bucle infinit en la unificació llançant un error de tipus.
+    \item \textbf{Incoherència de Tipus (\emph{Type Mismatch}):} S'avaluen negativament operacions invàlides com \texttt{1 + True}, branques de condicionals amb tipus heterogenis (\texttt{if True then 1 else False}) o aplicacions de valors no funcionals (\texttt{True 5}).
+\end{itemize}
+
 \section{Execució de Supercombinadors}
+
+Els fitxers de reflexió d'execució (\texttt{test\_eval\_0.hs} fins a \texttt{test\_eval\_11.hs}) validen el reductor de grafs, la generació d'entorns i, especialment, l'avaluació mandrosa (\emph{lazy evaluation}).
+
+\begin{description}
+    \item[\texttt{test\_eval\_0}, \texttt{10} i \texttt{11} (Recursió):] Es demostra la capacitat del motor per gestionar bucles recursius complexos. Destaca \texttt{factorial} amb acumulador (recursió de cua) i \texttt{aplicaVegades}, que avalua funcions d'ordre superior de manera iterativa aplicant lambdes en temps d'execució.
+    \item[\texttt{test\_eval\_1} i \texttt{9} (\emph{Shadowing}):] Garanteixen que l'àmbit lèxic manté la integritat de les dades quan s'oculten variables. A \texttt{extrem}, la redefinició contínua del nom \texttt{x} es resol correctament avaluant de dins cap a fora.
+    \item[\texttt{test\_eval\_2}, \texttt{3} i \texttt{7} (\emph{Closures} i Currificació):] Proven que les funcions parcials capturen correctament el seu entorn lèxic de variables. Per exemple, \texttt{creaMultiplicador 5} genera una cloure vàlida que manté el valor \texttt{5} guardat per a futures aplicacions.
+    \item[\texttt{test\_eval\_5} i \texttt{8} (\emph{Laziness}):] Són els tests crítics d'avaluació mandrosa. L'expressió \texttt{omega x = omega x} (o \texttt{bucle x}) defineix un bucle divergent no terminatiu. Com que \texttt{constant 99 (omega 0)} i \texttt{mandra 0} no necessiten avaluar l'argument divergent per retornar el resultat, l'intèrpret finalitza correctament (\texttt{99} i \texttt{42} respectivament) en lloc de quedar-se congelat.
+\end{description}
+
 \section{Limitacions actuals}
+
+Tot i la robustesa del nucli del llenguatge implementat, s'han delimitat certes fronteres tècniques per acotar l'abast del projecte i garantir la seva viabilitat en el temps establert:
+
+\begin{itemize}
+    \item \textbf{Absència de Tipus Algebraics de Dades (ADTs):} El llenguatge només dona suport natiu a tipus primitius binaris i numèrics (\texttt{Int}, \texttt{Bool}). No s'ha implementat l'estructura de dades complexa com llistes (\texttt{[]}), tuples o tipus de dades personalitzats definits per l'usuari (\texttt{data}).
+    \item \textbf{Manca de \emph{Pattern Matching}:} Com a conseqüència directa de la limitació anterior, definicions de lambdes basades en patrons o valors constants de manera directa (com es mostra als tests \texttt{\textbackslash 1 -> True} o \texttt{\textbackslash True -> 123}) no estan suportades per la sintaxi actual i generaran un error en l'anàlisi sintàctica o de tipus.
+    \item \textbf{Recursivitat Mútua o Creuada:} L'algorisme de resolució de definicions recursives (\texttt{infereixDefRec}) està dissenyat per tractar declaracions individuals que es criden a si mateixes. El sistema actual no admet blocs de funcions que depenguin jeràrquicament les unes de les altres de manera circular (recursivitat encreuada).
+\end{itemize}

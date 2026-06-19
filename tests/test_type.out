@@ -1,14 +1,14 @@
 bhct> Bool
-bhct> a2 -> a2
+bhct> a4 -> a4
 bhct> Int
-bhct> a2 -> a2
+bhct> a10 -> a10
 bhct> 
-bhct> a1 -> Bool
-bhct> a1 -> c1
+bhct> a13 -> Bool
+bhct> c18 -> c18
 bhct> Int -> Int
 bhct> Int -> Bool
 bhct> 
-bhct> (t4 -> t4) -> t4 -> t4
+bhct> (t50 -> t50) -> t50 -> t50
 bhct> Int -> Int
 bhct> Bool -> Bool
 bhct> 
@@ -16,15 +16,45 @@ bhct> Int -> Bool
 bhct> Int -> Int -> Bool
 bhct> 
 bhct> Int -> Bool
-bhct> (Bool -> t5) -> Int -> t5
+bhct> (Bool -> t102) -> Int -> t102
 bhct> 
 bhct> No es pot unificar un enter amb un booleà
 bhct> No es pot unificar un booleà amb un enter
-bhct> t3
+bhct> t105
 bhct> No es pot unificar un booleà amb un enter
 bhct> 
 bhct> 
 bhct> Int -> Bool
 bhct> Bool -> Int
 bhct> Int -> Int
+bhct> 
+bhct> 
+bhct> 
+bhct> 
+bhct> 
+bhct> 
+bhct> Variable no trobada
+bhct> Variable no trobada
+bhct> 
+bhct> 
+bhct> 
+bhct> Tipus infinit
+bhct> Tipus infinit
+bhct> 
+bhct> 
+bhct> 
+bhct> No es pot unificar un enter amb un booleà
+bhct> 
+bhct> 
+bhct> No es pot unificar un booleà amb un enter
+bhct> 
+bhct> 
+bhct> Aplicació no vàlida
+bhct> Aplicació no vàlida
+bhct> 
+bhct> 
+bhct> No es pot unificar un booleà amb un enter
+bhct> 
+bhct> 
+bhct> Divisió entre 0
 bhct> 
