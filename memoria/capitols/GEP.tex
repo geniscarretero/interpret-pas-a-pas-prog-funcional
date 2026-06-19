@@ -33,7 +33,7 @@ Per entendre l'abast teòric i la complexitat arquitectònica del projecte, és 
     
     \item \textbf{Arbre Sintàctic Abstracte (AST - Abstract Syntax Tree):} Una representació en forma d'arbre de l'estructura lògica del codi font. Cada node de l'arbre denota un constructe del codi (una operació, una declaració, etc.). El parser serà l'encarregat de generar aquest AST a partir del text escrit per l'alumne.
     
-    \item \textbf{Monadic Parser Combinators:} Una tècnica avançada de programació funcional per a l'anàlisi lèxica i sintàctica. Permet tractar els \textit{parsers} (analitzadors) com a valors de primera classe. Mitjançant operacions monàdiques, es poden combinar petits analitzadors (ex. un que llegeix un dígit) per construir analitzadors de gramàtiques altament complexes \citep{hutton1996monadic}.
+    \item \textbf{Monadic Parser Combinators:} Una tècnica avançada de programació funcional per a l'anàlisi lèxica i sintàctica. Permet tractar els \textit{parsers} (analitzadors) com a valors de primera classe. Mitjançant operacions monàdiques, es poden combinar petits analitzadors (ex. un que llegeix un dígit) per construir analitzadors de gramàtiques altament complexes \cite{hutton1996monadic}.
 \end{itemize}
 
 \subsection{Identificació del problema a resoldre}
@@ -87,7 +87,7 @@ Per tal de justificar de manera diàfana i esquemàtica el valor d'aquesta soluc
 \end{tabularx}
 \end{table}
 
-A més de l'evident salt en usabilitat que s'observa a la taula, a nivell arquitectònic l'aportació clau és la utilització del paradigma de \textbf{Monadic Parser Combinators} \citep{hutton1998monadic, leijen2001parsec} per al desenvolupament del nucli (\textit{core}). Aquesta metodologia, en detriment d'usar eines automàtiques de generació de parsers com Lex/Yacc o Alex/Happy, proporciona dos beneficis fonamentals: primer, el codi de l'intèrpret s'escriu completament en Haskell natiu; i segon, la definició del parser s'assembla pràcticament línia a línia a la gramàtica BNF oficial. Això és decisiu perquè qualsevol professor de la FIB, en el futur, pugui obrir el codi d'aquest TFG i afegir una nova funcionalitat sintàctica sense haver de ser un expert en eines de tercers. L'arquitectura garantirà, a més, la capacitat de generar missatges d'error personalitzats fets a mida per l'assignatura.
+A més de l'evident salt en usabilitat que s'observa a la taula, a nivell arquitectònic l'aportació clau és la utilització del paradigma de \textbf{Monadic Parser Combinators} \cite{hutton1998monadic, leijen2001parsec} per al desenvolupament del nucli (\textit{core}). Aquesta metodologia, en detriment d'usar eines automàtiques de generació de parsers com Lex/Yacc o Alex/Happy, proporciona dos beneficis fonamentals: primer, el codi de l'intèrpret s'escriu completament en Haskell natiu; i segon, la definició del parser s'assembla pràcticament línia a línia a la gramàtica BNF oficial. Això és decisiu perquè qualsevol professor de la FIB, en el futur, pugui obrir el codi d'aquest TFG i afegir una nova funcionalitat sintàctica sense haver de ser un expert en eines de tercers. L'arquitectura garantirà, a més, la capacitat de generar missatges d'error personalitzats fets a mida per l'assignatura.
 
 \section{Abast i Objectius del Projecte}
 
@@ -156,7 +156,7 @@ L'enginyeria d'un compilador docent comporta un seguit de riscos tècnics i conc
 
 \section{Metodologia i Rigor de Desenvolupament}
 
-L'elevada incertesa de dissenyar una aplicació altament tècnica fa inviable l'ús de metodologies clàssiques o predictives (model en Cascada). En conseqüència, es seguirà una \textbf{metodologia iterativa i incremental} amb un fort enfocament àgil basat en les cerimònies i pràctiques del \textbf{marc de treball Scrum} \citep{fib_modulo2}. Malgrat ser un projecte individual, l'alumne aplicarà aquest rigor assumint de facto els rols fonamentals: actuarà com a \textit{Product Owner} definint els requeriments i alhora com a equip de desenvolupament de manera autoorganitzada.
+L'elevada incertesa de dissenyar una aplicació altament tècnica fa inviable l'ús de metodologies clàssiques o predictives (model en Cascada). En conseqüència, es seguirà una \textbf{metodologia iterativa i incremental} amb un fort enfocament àgil basat en les cerimònies i pràctiques del \textbf{marc de treball Scrum} \cite{fib_modulo2}. Malgrat ser un projecte individual, l'alumne aplicarà aquest rigor assumint de facto els rols fonamentals: actuarà com a \textit{Product Owner} definint els requeriments i alhora com a equip de desenvolupament de manera autoorganitzada.
 
 \textbf{Estructura de Cicles Iteratius (Sprints):} 
 El projecte s'estructurarà en cicles anomenats *Sprints* d'una durada constant de 2 a 3 setmanes. Al finalitzar cadascun d'aquests Sprints s'assolirà una fita rellevant; la generació d'un Increment del Producte potencialment entregable. La lògica evolutiva de l'increment serà:

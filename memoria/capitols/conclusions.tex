@@ -1,4 +1,32 @@
 \chapter{Conclusions}
+Aquest darrer capítol tanca la memòria del projecte, fent balanç de la feina desenvolupada al llarg de tots aquests mesos. Es presenta una avaluació crítica dels resultats obtinguts respecte a les metes inicials, una reflexió sobre el procés d'aprenentatge viscut durant la implementació, i finalment, es plantegen possibles vies d'ampliació per evolucionar el sistema en el futur.
+
 \section{Objectius assolits}
+L'objectiu principal d'aquest treball era dissenyar i implementar des de zero un intèrpret funcional completament operatiu, bastit exclusivament sobre Haskell i sense dependre d'eines externes de generació de codi. Després d'analitzar els resultats obtinguts i el funcionament del sistema, es pot afirmar que aquest objectiu s'ha assolit amb èxit. 
+
+De manera més específica, s'han complert les següents fites tècniques:
+\begin{itemize}
+    \item \textbf{Construcció d'un parser natiu i robust:} S'ha implementat amb èxit una arquitectura d'anàlisi lèxica i sintàctica basada en combinadors monàdics. Aquest enfocament ha permès analitzar amb èxit expressions complexes, respectant la precedència d'operadors i l'associativitat per l'esquerra pròpia de l'aplicació de funcions.
+    \item \textbf{Motor d'inferència de tipus segur:} S'ha integrat un algorisme d'inferència basat en el sistema Damas-Milner, capaç de deduir estructuralment els tipus de les expressions i de suportar polimorfisme paramètric, dotant el llenguatge d'una capa de seguretat estàtica prèvia a l'execució.
+    \item \textbf{Avaluació mandrosa i gestió de memòria:} El nucli de l'intèrpret s'ha construït sobre un model d'avaluació mandrosa (\textit{lazy evaluation}), on l'ús de \textit{thunks} (promeses de càlcul) garanteix que les expressions només es redueixen quan són estrictament necessàries. Això ha permès tractar de forma natural avaluacions parcials i currificació.
+    \item \textbf{Disseny modular i homogeni:} Tot el codi manté una arquitectura purament funcional i declarativa, on les fases de \textit{parsing}, tipificació i avaluació estan clarament desacoblades, complint amb els estàndards de l'enginyeria de programari moderna.
+\end{itemize}
+
 \section{Aprenentatges personals}
+Més enllà dels resultats tècnics o del codi produït, la realització d'aquest Treball de Final de Grau ha suposat un repte intel·lectual de primer ordre i m'ha permès assolir aprenentatges molt valuosos.
+
+En primer lloc, he consolidat de manera profunda la meva comprensió del paradigma de la programació funcional. Passar de ser un simple usuari d'un llenguatge a haver de programar-ne el funcionament intern obliga a entendre d'arrel conceptes com el Càlcul Lambda, les clausures lèxiques (\textit{closures}), l'aplicació parcial i els efectes controlats mitjançant mònades. 
+
+En segon lloc, m'ha permès tancar la bretxa entre la teoria i la pràctica de l'enginyeria de llenguatges. Llegir la teoria sobre arbres de sintaxi abstracta o regles d'inferència és molt diferent de la complexitat pràctica de programar la substitució dinàmica de variables i evitar les col·lisions d'entorns d'execució. 
+
+Finalment, a nivell metodològic i organitzatiu, he après a gestionar un projecte de programari de llarga durada. Això inclou no només la picada de codi i l'arquitectura de programari, sinó també la recerca bibliogràfica acadèmica, la lectura de \textit{papers} fundacionals i la redacció formal en \LaTeX, eines que sens dubte seran fonamentals per a la meva futura carrera professional.
+
 \section{Treball futur}
+El disseny de llenguatges és un camp pràcticament inabastable, i per aquest motiu, qualsevol intèrpret acadèmic té marge de creixement. Tot i que el sistema actual és complet i operatiu dins del seu abast teòric, es proposen les següents línies de treball per a futures iteracions o ampliacions del projecte:
+
+\begin{itemize}
+    \item \textbf{Millora en la traçabilitat d'errors:} Actualment, quan el \textit{parser} falla o hi ha un error de tipus genèric, els missatges retornats a l'usuari són funcionals però aspres. Una millora significativa consistiria a afegir un seguiment de posició (línia i columna) per emetre missatges d'error formatajats a l'estil dels compiladors moderns.
+    \item \textbf{Tipus de dades algebraics (ADTs) i \textit{Pattern Matching}:} L'extensió natural del llenguatge requeriria dotar a l'usuari de la capacitat de definir els seus propis tipus (com llistes o arbres enumerats) i introduir construccions sintàctiques de reconeixement de patrons tipus \texttt{case ... of}, seguint els estàndards actuals.
+    \item \textbf{Compilació cap a una màquina virtual (STG):} Tot i que l'intèrpret actual camina per l'arbre (AST) de forma eficaç, per aconseguir rendiments propers a compiladors reals com GHC, el pas següent seria traduir l'AST a instruccions d'una \textit{Spineless Tagless G-machine} (STG), abandonant la interpretació directa a favor d'un entorn de memòria altament optimitzat.
+    \item \textbf{Llibreria estàndard (\textit{Prelude}):} L'ampliació de l'entorn global per defecte amb una col·lecció substancial de funcions predefinides sobre llistes, cadenes de text i manipulació matemàtica abstracta dotaria de molta més expressivitat pràctica l'usuari final del llenguatge.
+\end{itemize}

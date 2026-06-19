@@ -5,6 +5,7 @@
 \usepackage{csquotes}
 \usepackage{float}
 \usepackage{graphicx}
+\usepackage{pdfpages}
 \usepackage{subcaption}
 \usepackage{hyperref}
 \usepackage[a4paper,margin=1in]{geometry}
@@ -32,11 +33,13 @@
 }
 \usepackage{longtable}
 \usepackage{eurosym}
-\usepackage[authoryear]{natbib}
 \usepackage{xcolor}
 \usepackage{pgfgantt}
 \usepackage{forest}
 \usepackage{amsmath}
+
+\usepackage[backend=biber, style=numeric, sorting=nty]{biblatex}
+\addbibresource{bibliografia.bib}
 
 % Configuració per a fragments de codi Haskell
 \definecolor{codegreen}{rgb}{0,0.6,0}
@@ -67,25 +70,7 @@
 \begin{document}
 
 % --- PORTADA ---
-\begin{titlepage}
-    \centering
-    \vspace*{1cm}
-    % \includegraphics[width=0.8\textwidth]{logo-uni.png} % Descomentar quan tinguis el fitxer
-    \vspace{1.5cm}
-    {\scshape\Large Facultat d'Informàtica de Barcelona \par}
-    \vspace{1cm}
-    {\scshape\Large Treball de Final de Grau \par}
-    \vspace{1.5cm}
-    {\huge\bfseries Intèrpret Pas a Pas per a Programació Funcional \par}
-    \vspace{2cm}
-    {\Large\itshape Genís Carretero Ferrete\par}
-    \vfill
-    \begin{tabular}{ll}
-        \textbf{Director:} & Gerard Escudero Bakx \\
-        \textbf{Titulació:} & Grau en Enginyeria Informàtica (Computació) \\
-        \textbf{Data:} & Maig 2024
-    \end{tabular}
-\end{titlepage}
+\includepdf[pages={1}]{portada.pdf}
 
 %  INDEX
 \setlength{\parskip}{0em} % Afegeix espai entre paràgrafs per facilitar la lectura
@@ -103,5 +88,7 @@
 \include{capitols/avaluacio}
 \include{capitols/resultats}
 \include{capitols/conclusions}
+
+\printbibliography[heading=bibintoc, title={Bibliografia}]
 
 \end{document}
