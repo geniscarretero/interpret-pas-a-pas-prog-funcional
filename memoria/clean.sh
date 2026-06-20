@@ -1,1 +1,0 @@
-find . -maxdepth 2 -type f ! -name '*.tex' ! -name '*.pdf' ! -name '*.sh' ! -name '*.bib' -delete
