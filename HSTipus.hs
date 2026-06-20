@@ -26,11 +26,6 @@ funcionsPredefinides = [  ("+", TFun TInt (TFun TInt TInt)),
                 ("==", TFun TInt (TFun TInt TBool)),
                 ("&&", TFun TBool (TFun TBool TBool)),
                 ("||", TFun TBool (TFun TBool TBool)),
-                --Esborrar perquè les afegire al preludi del llenguatge
-                ("id", TFun (TVar "a") (TVar "a")),
-                ("const", TFun (TVar "a") (TFun (TVar "b") (TVar "a"))),
-                ("not", TFun (TBool) (TBool)),
-                (".", TFun (TFun (TVar "b") (TVar "c"))(TFun (TFun (TVar "a") (TVar "b")) (TFun (TVar "a") (TVar "c")))),
                 ("True", TBool),
                 ("False", TBool)
                 ]

@@ -1,3 +1,9 @@
+-- Funcions bàsiques
+const a b = a
+id x = x
+(.) f g x = f (g x)
+not x = if x then False else True
+
 :t id True
 :t id id
 :t const 5 True

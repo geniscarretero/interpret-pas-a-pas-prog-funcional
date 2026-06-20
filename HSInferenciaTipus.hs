@@ -26,8 +26,8 @@ aplicaSubstCtx subs ((st,t):ctx) = ((st, aplicaSubst subs t): (aplicaSubstCtx su
 --Donats dos tipus s'obté el conjunt de substitucions necessàries pq siguin el mateix tipus
 -- t1 == t2
 generaSubst :: Tipus -> Tipus -> Either String Subst
-generaSubst TInt TBool = Left "No es pot unificar un enter amb un booleà"
-generaSubst TBool TInt = Left "No es pot unificar un booleà amb un enter"
+generaSubst TInt TBool = Left "Error d'inferència: No es pot unificar un enter amb un booleà"
+generaSubst TBool TInt = Left "Error d'inferència: No es pot unificar un booleà amb un enter"
 generaSubst (TFun t1 t2) (TFun t3 t4) = do 
   first  <- generaSubst t1 t3
   second <- generaSubst (aplicaSubst first t2) (aplicaSubst first t4)
@@ -36,7 +36,7 @@ generaSubst (TVar ('t':s1)) (TVar s2) = Right [(('t':s1), (TVar s2))]
 generaSubst (TVar s1) (TVar s2) = Right [(s2, (TVar s1))]  
 generaSubst t (TVar s) 
   | TVar s == t = return []
-  | ocorreEn s t = Left "Tipus infinit"
+  | ocorreEn s t = Left "Error d'inferència: Tipus infinit"
   | otherwise = return [(s,t)]
 generaSubst (TVar s) t = generaSubst t (TVar s)
 generaSubst _ _ =  Right []
@@ -60,8 +60,8 @@ renameTVar t _ = Nothing
 
 forceRenameTVar :: Tipus -> Int -> Maybe Tipus
 forceRenameTVar (TFun t1 t2) n = do 
-  r1 <- (renameTVar t1 n)
-  r2 <- (renameTVar t2 n)
+  r1 <- (forceRenameTVar t1 n)
+  r2 <- (forceRenameTVar t2 n)
   return (TFun r1 r2)
 forceRenameTVar (TVar s) n = Just (TVar (s++(show n)))
 forceRenameTVar t _ = Nothing
@@ -70,8 +70,8 @@ infereix :: Context -> Context -> Expr -> Int -> Either String (Tipus, Subst, In
 infereix _ _ (Val _) i = Right (TInt, [], i) 
 
 infereix inictx ctx (Var a) n = case lookup a ctx of
-                  Nothing -> Left "Variable no trobada"
-                  Just t -> do 
+                  Nothing -> Left "Error d'inferència: Variable no trobada"
+                  Just t ->
                     case lookup a inictx of
                       Nothing ->
                         case renameTVar t n of

@@ -18,10 +18,10 @@ bhct>
 bhct> Int -> Bool
 bhct> (Bool -> t102) -> Int -> t102
 bhct> 
-bhct> No es pot unificar un enter amb un booleà
-bhct> No es pot unificar un booleà amb un enter
+bhct> Error d'inferència: No es pot unificar un enter amb un booleà
+bhct> Error d'inferència: No es pot unificar un booleà amb un enter
 bhct> t105
-bhct> No es pot unificar un booleà amb un enter
+bhct> Error d'inferència: No es pot unificar un booleà amb un enter
 bhct> 
 bhct> 
 bhct> Int -> Bool
@@ -33,28 +33,28 @@ bhct>
 bhct> 
 bhct> 
 bhct> 
-bhct> Variable no trobada
-bhct> Variable no trobada
+bhct> Error d'inferència: Variable no trobada
+bhct> Error d'inferència: Variable no trobada
 bhct> 
 bhct> 
 bhct> 
-bhct> Tipus infinit
-bhct> Tipus infinit
+bhct> Error d'inferència: Tipus infinit
+bhct> Error d'inferència: Tipus infinit
 bhct> 
 bhct> 
 bhct> 
-bhct> No es pot unificar un enter amb un booleà
+bhct> Error d'inferència: No es pot unificar un enter amb un booleà
 bhct> 
 bhct> 
-bhct> No es pot unificar un booleà amb un enter
+bhct> Error d'inferència: No es pot unificar un booleà amb un enter
 bhct> 
 bhct> 
-bhct> Aplicació no vàlida
-bhct> Aplicació no vàlida
+bhct> Error d'avaluació: Aplicació no vàlida
+bhct> Error d'avaluació: Aplicació no vàlida
 bhct> 
 bhct> 
-bhct> No es pot unificar un booleà amb un enter
+bhct> Error d'inferència: No es pot unificar un booleà amb un enter
 bhct> 
 bhct> 
-bhct> Divisió entre 0
+bhct> Error d'avaluació: Divisió entre 0
 bhct> 

@@ -161,7 +161,7 @@ compute Div [a1, a2] (aa,hp) =
     Just (NVal n1) = IM.lookup a1 hp
     Just (NVal n2) = IM.lookup a2 hp
   in 
-    if n2 == 0 then Left ("Divisió entre 0")
+    if n2 == 0 then Left ("Error d'avaluació: Divisió entre 0")
       else 
     Right(Val (div n1 n2))
 
@@ -251,7 +251,7 @@ pas (a, (aa,hp)) typeEnv defEnv stk =
       in Right (aa1,newHp)
       ) 
     NVar s -> 
-      if s == "False" || s == "True" then Left "Aplicació no vàlida"
+      if s == "False" || s == "True" then Left "Error d'avaluació: Aplicació no vàlida"
         else
       (
       case HM.lookup s defEnv of 
@@ -298,9 +298,9 @@ pas (a, (aa,hp)) typeEnv defEnv stk =
             in Right(aa1, (IM.insert a contingut hp1))
             )
           )
-        Nothing -> Left "Variable no trobada" 
+        Nothing -> Left "Error d'avaluació: Variable no trobada" 
         )
-    NVal _ -> Left ("Aplicació no vàlida") -- Hauria de petar
+    NVal _ -> Left ("Error d'avaluació: Aplicació no vàlida") -- Hauria de petar
     NApp a1 a2 -> pas (a1, (aa,hp)) typeEnv defEnv (a:stk)
     NIf a1 a2 a3 -> if not (isWHNF (a1,(aa,hp)) typeEnv) 
       then pas (a1, (aa, hp)) typeEnv defEnv []
