@@ -20,3 +20,51 @@ Per arrencar l'intèrpret interactiu, executa la següent comanda a l'arrel del 
 
 ```bash
 cabal run
+```
+
+Un cop dins de l'intèrpret (`bhct> `), tens diverses eines a la teva disposició:
+
+**1. Definició de funcions (Bindings):**
+Pots definir funcions lineals o amb guàrdies directament a la consola.
+```haskell
+bhct> suma x y = x + y
+bhct> factorial n | n == 0 = 1 | otherwise = n * factorial (n - 1)
+```
+
+**2. Inspecció de Tipus (`:t`):**
+Avalua estàticament l'expressió i en dedueix el tipus més general (polimòrfic).
+```haskell
+bhct> :t (\x -> x + x)
+Int -> Int
+
+bhct> :t id
+a1 -> a1
+
+bhct> :t (.)
+(b1 -> c1) -> (a2 -> b1) -> a2 -> c1
+```
+
+**3. Inspecció de l'AST (`:a`):**
+Mostra la representació interna de l'arbre de sintaxi abans de convertir-lo en graf.
+```haskell
+bhct> :a (+) 2 3
+App (App (Var "+") (Val 2)) (Val 3)
+```
+
+**4. Avaluació Pas a Pas:**
+Introdueix qualsevol expressió per veure la seva seqüència de reducció (com col·lapsa el graf a cada pas fins arribar a la Forma Normal de Cap Feble - WHNF).
+```haskell
+bhct> (\x y -> x * y) 2 3
+(\x y -> (*) x y) 2 3
+(\y -> (*) 2 y) 3
+(*) 2 3
+6
+```
+
+## Característiques Actuals
+
+- **Anàlisi Sintàctica Nativa:** Construïda exclusivament amb combinadors monàdics, capaç de desugarejar aplicacions parcials (*currying*), lambdes aniuades i guàrdies lògiques (`|`).
+- **Inferència de Tipus Robusta:** Sistema Hindley-Milner complet. Resol el polimorfisme paramètric generant variables fresques dinàmiques i atura l'execució d'expressions divergents gràcies al *Occurs Check* (prevenció de tipus infinits).
+- **Avaluació Mandrosa (*Lazy Evaluation*):** El nucli redueix les expressions sota demanda mitjançant *Spine Unwinding*, compartint referències de memòria temporal mitjançant un *Heap* purificat basat en `IntMap`.
+- **Recursivitat Eficient:** Implementació de *Supercombinadors* que permet resoldre funcions recursives de manera nativa al graf, evitant saturacions de l'AST.
+- **Transparència Educativa:** Formatatge textual estètic de l'estat del graf a cada instant (`hsprint`) dissenyat expressament per seguir les beta-reduccions i el càlcul de les primitives.
