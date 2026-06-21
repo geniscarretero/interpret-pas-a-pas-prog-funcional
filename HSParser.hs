@@ -231,12 +231,20 @@ ifThenElse = (do
 operator :: Parser Expr
 operator = do
   t1 <- logicOr
-  (do 
+  (do
+    (do
       op <- token nomOperador
       t2 <- operator
       if op == "|" then empty --ESBORRAR
       else return (App (App (Var op) t1) t2)
-      ) <|> return t1
+      ) <|> (do
+      sat (== '`')
+      nom <- nomVariable 
+      sat (== '`')
+      t2 <- operator
+      return (App(App (Var nom) t1) t2)
+      )
+    ) <|>return t1
 
 logicOr :: Parser Expr
 logicOr = do

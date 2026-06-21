@@ -37,11 +37,15 @@ Avalua estàticament l'expressió i en dedueix el tipus més general (polimòrfi
 bhct> :t (\x -> x + x)
 Int -> Int
 
+bhct> id x = x
+
 bhct> :t id
-a1 -> a1
+t24 -> t24
+
+bhct> (.) f g x = f (g x) 
 
 bhct> :t (.)
-(b1 -> c1) -> (a2 -> b1) -> a2 -> c1
+(t1214 -> t1314) -> (t814 -> t1214) -> t814 -> t1314
 ```
 
 **3. Inspecció de l'AST (`:a`):**
