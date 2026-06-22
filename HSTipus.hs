@@ -34,6 +34,14 @@ funcionsPredefinides = [  ("+", TFun TInt (TFun TInt TInt)),
 preludeTypeEnv :: TypeEnv 
 preludeTypeEnv = HM.fromList funcionsPredefinides
 
+filterVal :: [(String, Tipus)] -> [(String,Tipus)]
+filterVal ctx = filter isNotVal ctx
+  where 
+    isNotVal ("False", _) = True
+    isNotVal ("True", _) = True
+    isNotVal (_, (TFun _ _)) = True
+    isNotVal _ = False 
+
 data Tipus = TInt
            | TBool
            | TFun Tipus Tipus

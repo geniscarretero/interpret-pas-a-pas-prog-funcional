@@ -5,12 +5,12 @@ bhct>
 bhct> 
 bhct> 
 bhct> Bool
-bhct> t623 -> t623
+bhct> t6.23 -> t6.23
 bhct> Int
-bhct> t629 -> t629
+bhct> t6.29 -> t6.29
 bhct> 
-bhct> t334 -> Bool
-bhct> t640 -> t640
+bhct> t3.34 -> Bool
+bhct> t6.40 -> t6.40
 bhct> Int -> Int
 bhct> Int -> Bool
 bhct> 

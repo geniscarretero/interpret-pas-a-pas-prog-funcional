@@ -40,12 +40,12 @@ Int -> Int
 bhct> id x = x
 
 bhct> :t id
-t24 -> t24
+t6.8 -> t6.8
 
 bhct> (.) f g x = f (g x) 
 
 bhct> :t (.)
-(t1214 -> t1314) -> (t814 -> t1214) -> t814 -> t1314
+(t16.18 -> t17.18) -> (t12.18 -> t16.18) -> t12.18 -> t17.18
 ```
 
 **3. Inspecció de l'AST (`:a`):**

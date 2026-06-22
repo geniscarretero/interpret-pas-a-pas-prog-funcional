@@ -1,14 +1,20 @@
-bhct> Bool
-bhct> a4 -> a4
-bhct> Int
-bhct> a10 -> a10
 bhct> 
-bhct> a13 -> Bool
-bhct> c18 -> c18
+bhct> 
+bhct> 
+bhct> 
+bhct> 
+bhct> 
+bhct> Bool
+bhct> t6.23 -> t6.23
+bhct> Int
+bhct> t6.29 -> t6.29
+bhct> 
+bhct> t3.34 -> Bool
+bhct> t6.40 -> t6.40
 bhct> Int -> Int
 bhct> Int -> Bool
 bhct> 
-bhct> (t50 -> t50) -> t50 -> t50
+bhct> (t69 -> t69) -> t69 -> t69
 bhct> Int -> Int
 bhct> Bool -> Bool
 bhct> 
@@ -16,11 +22,11 @@ bhct> Int -> Bool
 bhct> Int -> Int -> Bool
 bhct> 
 bhct> Int -> Bool
-bhct> (Bool -> t102) -> Int -> t102
+bhct> (Bool -> t121) -> Int -> t121
 bhct> 
 bhct> Error d'inferència: No es pot unificar un enter amb un booleà
 bhct> Error d'inferència: No es pot unificar un booleà amb un enter
-bhct> t105
+bhct> t124
 bhct> Error d'inferència: No es pot unificar un booleà amb un enter
 bhct> 
 bhct> 

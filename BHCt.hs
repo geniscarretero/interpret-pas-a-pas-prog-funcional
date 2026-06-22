@@ -76,7 +76,7 @@ output (Just input) m typeEnv defEnv typeNum=
                         Right ((a1,hs1), trace) -> return ((foldl (\x y -> x ++ y++ "\n") "" trace), typeEnv, defEnv, newTypeNum)
                       )
               Right (Bind str e) -> 
-                case infereixDefRec (HM.toList typeEnv) (HM.toList typeEnv) str e typeNum of
+                case infereixDefRec (filterVal (HM.toList typeEnv)) (filterVal (HM.toList typeEnv)) str e typeNum of
                   Left text -> return (text, typeEnv, defEnv, typeNum)
                   --Right (t, _, newTypeNum) -> return ("typeEnv:\n"++show (HM.insert str t typeEnv)++ "\ndefEnv\n" ++ show (HM.insert str (FuncDef e) defEnv) ++ "\n" , (HM.insert str t typeEnv), (HM.insert str (FuncDef e) defEnv), newTypeNum )
                   Right (t, _, newTypeNum) -> return ("" , (HM.insert str t typeEnv), (HM.insert str (FuncDef e) defEnv), newTypeNum )
