@@ -16,6 +16,7 @@ aplicaSubst s (TVar v) = case lookup v s of
                             Just t  -> aplicaSubst s t -- Continuem buscant per si t és una altra TVar
                             Nothing -> TVar v
 aplicaSubst s (TFun t1 t2) = TFun (aplicaSubst s t1) (aplicaSubst s t2)
+aplicaSubst s (TList t) = TList (aplicaSubst s t)
 aplicaSubst _ t = t -- TInt, TBool es queden igual
 
 -- Donats un conjunt de substitucions i un context, s'apliquen les substitucions en el context i es retorna.
@@ -28,6 +29,10 @@ aplicaSubstCtx subs ((st,t):ctx) = ((st, aplicaSubst subs t): (aplicaSubstCtx su
 generaSubst :: Tipus -> Tipus -> Either String Subst
 generaSubst TInt TBool = Left "Error d'inferència: No es pot unificar un enter amb un booleà"
 generaSubst TBool TInt = Left "Error d'inferència: No es pot unificar un booleà amb un enter"
+generaSubst (TList _) TInt = Left "Error d'inferència: No es pot unificar una llista amb un enter"
+generaSubst TInt (TList _) = Left "Error d'inferència: No es pot unificar una enter amb una llista"
+generaSubst TBool (TList _) = Left "Error d'inferència: No es pot unificar un booleà amb una llista"
+generaSubst (TList _) TBool = Left "Error d'inferència: No es pot unificar una llista amb un booleà"
 generaSubst (TFun t1 t2) (TFun t3 t4) = do 
   first  <- generaSubst t1 t3
   second <- generaSubst (aplicaSubst first t2) (aplicaSubst first t4)
@@ -39,11 +44,13 @@ generaSubst t (TVar s)
   | ocorreEn s t = Left "Error d'inferència: Tipus infinit"
   | otherwise = return [(s,t)]
 generaSubst (TVar s) t = generaSubst t (TVar s)
+generaSubst (TList t1) (TList t2) = generaSubst t1 t2
 generaSubst _ _ =  Right []
 
 ocorreEn :: String -> Tipus -> Bool
 ocorreEn s (TVar a) = s == a 
 ocorreEn s (TFun t1 t2) = ocorreEn s t1 || ocorreEn s t2 
+ocorreEn s (TList t) = ocorreEn s t
 ocorreEn _ _ = False
 
 envInicial :: Context
@@ -56,6 +63,9 @@ renameTVar (TFun t1 t2) n = do
   return (TFun r1 r2)
 renameTVar (TVar ('t':rest)) n = Just (TVar ('t':rest))  --la deixem igual si comença amb t, (meves)
 renameTVar (TVar s) n = Just (TVar (s++"."++(show n)))
+renameTVar (TList t) n = do
+  t1 <- renameTVar t n
+  return (TList t1)
 renameTVar t _ = Nothing
 
 forceRenameTVar :: Tipus -> Int -> Maybe Tipus
@@ -64,6 +74,9 @@ forceRenameTVar (TFun t1 t2) n = do
   r2 <- (forceRenameTVar t2 n)
   return (TFun r1 r2)
 forceRenameTVar (TVar s) n = Just (TVar (s++"."++(show n)))
+forceRenameTVar (TList t) n = do
+  t1 <- forceRenameTVar t n
+  return (TList t1)
 forceRenameTVar t _ = Nothing
 
 infereix :: Context -> Context -> Expr -> Int -> Either String (Tipus, Subst, Int)

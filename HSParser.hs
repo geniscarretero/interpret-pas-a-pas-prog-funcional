@@ -304,7 +304,7 @@ atom = (token (sat (== '(')) *> expr <* token (sat (== ')')))
     x <- intToken
     return (Val x)
     <|> do
-    y <- (nomVariable <|> (token(sat (== '(')) *> nomOperador <* token (sat (== ')'))))
+    y <- (nomVariable <|> (token(sat (== '(')) *> nomOperador <* token (sat (== ')'))) <|> (token(stringMatch "[]")))
     return (Var y)
 
 lam :: Parser Expr

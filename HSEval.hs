@@ -102,12 +102,20 @@ getNumAppOfPredFunc :: (Addr,HeapState) -> Int -> TypeEnv -> (Bool, Int, Int)
 getNumAppOfPredFunc (a, (aa,hp)) i  typeEnv= 
   let Just n = IM.lookup a hp
   in case n of 
-    NVal _ -> (False, i, 0)
+    NVal _ -> (False, i, 0) -- NO passarà mai 
     NVar str -> case HM.lookup str typeEnv of
-      Nothing -> (False, i, 0)
+      Nothing -> (False, i, 0) -- No passarà
       Just t -> (True, i, (getNumParams t 0))
     NLam _ _ -> (False, i, 0)
     NApp a1 _ -> getNumAppOfPredFunc (a1,(aa,hp)) (i+1) typeEnv
+
+esLlista :: (Addr,HeapState) -> Bool
+esLlista (a, (aa,hp))  =
+  let Just n = IM.lookup a hp 
+  in case n of
+    NVar ":" -> True
+    NApp a1 _ -> esLlista (a1, (aa,hp)) 
+    _ -> False
 
 -- WHNF:
 --Weak Head Normal Form (WHNF): una expressió està en WHNF si és:
@@ -124,8 +132,10 @@ isWHNF (a, (aa,hp)) typeEnv =
     NLam _ _ -> True
     NApp _ _ -> (
       let 
+        bl = esLlista (a, (aa,hp))
         (b1, nApps, nPars) = getNumAppOfPredFunc (a, (aa,hp)) 0 typeEnv
-      in case b1 of
+      in if bl then True
+        else case b1 of
           True  -> if nApps >= nPars then False else True
           False -> False
       )
@@ -339,9 +349,24 @@ evalLoop graph@(addr, _) n typeEnv defEnv trace =
         (hs,trace1) <- evalLoop (addr, next) (n-1) typeEnv defEnv trace 
         return (hs, ((hsprint graph False):trace1))
 
+printList :: (Addr, HeapState) -> Bool  -> String
+printList (a, hs@(aa,hp)) first =
+  (if first then "[" else "")++
+  (case IM.lookup a hp of
+    Just (NApp e d) -> 
+      let 
+        Just (NApp _ ed) = IM.lookup e hp 
+      in 
+        (if first then "" else ",")++(hsprint  (ed, hs) False) ++ (printList (d,hs) False) 
+    Just (NVar "[]") -> "")++
+  (if first then "]" else "")
 
 hsprint :: (Addr, HeapState) -> Bool -> String
 hsprint (a, hs@(aa,hp)) inLam =
+  if esLlista (a,hs)
+    then
+      printList (a,hs) True
+    else
   let Just n = IM.lookup a hp
   in 
     case n of 

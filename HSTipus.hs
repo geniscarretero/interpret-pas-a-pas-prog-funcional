@@ -26,6 +26,8 @@ funcionsPredefinides = [  ("+", TFun TInt (TFun TInt TInt)),
                 ("==", TFun TInt (TFun TInt TBool)),
                 ("&&", TFun TBool (TFun TBool TBool)),
                 ("||", TFun TBool (TFun TBool TBool)),
+                ("[]", TList (TVar "a")),
+                (":", TFun (TVar "a") (TFun (TList (TVar "a")) (TList (TVar "a")))),
                 ("True", TBool),
                 ("False", TBool)
                 ]
@@ -39,6 +41,8 @@ filterVal ctx = filter isNotVal ctx
   where 
     isNotVal ("False", _) = True
     isNotVal ("True", _) = True
+    isNotVal ("[]", _) = True
+    isNotVal (":", _) = True
     isNotVal (_, (TFun _ _)) = True
     isNotVal _ = False 
 
@@ -46,11 +50,13 @@ data Tipus = TInt
            | TBool
            | TFun Tipus Tipus
            | TVar String
+           | TList Tipus
            deriving (Show,Eq)
 
 showTipus :: Tipus -> String
 showTipus TInt = "Int"
 showTipus TBool = "Bool"
+showTipus (TList t) = "["++(showTipus t)++"]"
 showTipus (TFun (TFun t1 t2) t3) = "(" ++ showTipus t1 ++ " -> " ++ showTipus t2 ++ ")" ++ " -> " ++ showTipus t3 
 showTipus (TFun t1 t2) = showTipus t1 ++ " -> " ++ showTipus t2
 showTipus (TVar a) = a

@@ -59,10 +59,9 @@ output (Just input) m typeEnv defEnv typeNum=
                   (Var nom) -> 
                     (do
                       let (a, hs) = ast2graph e (0, IM.empty) []  
-                    
                       case evalVar (a,hs) typeEnv defEnv [] of
                         Left text -> return (text, typeEnv, defEnv, newTypeNum)
-                        --Right (a1,hs1) -> return ((show (a1,hs1)), typeEnv, defEnv)
+                        --right (a1,hs1) -> return ((show (a1,hs1)), typeEnv, defEnv)
                         Right ((a1,hs1), trace) -> return ((foldl (\x y -> x ++ y++ "\n") "" trace), typeEnv, (HM.insert nom (FuncDef (graph2ast (a1,hs1))) defEnv), newTypeNum)
                       )
                   _ ->
