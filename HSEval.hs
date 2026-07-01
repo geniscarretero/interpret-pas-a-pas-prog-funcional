@@ -141,6 +141,14 @@ isWHNF (a, (aa,hp)) typeEnv =
       )
     NIf _ _ _ -> False 
 
+isVar :: (Addr, HeapState) -> Bool
+isVar (a, (aa,hp))=
+  case IM.lookup a hp of
+    Just (NVar "False") -> False
+    Just (NVar "True") -> False
+    Just (NVar _ ) -> True
+    _ -> False
+
 -- Precondicions:
 -- les adreces ja ho tenen tot avaluat en 
 
@@ -273,11 +281,11 @@ pas (a, (aa,hp)) typeEnv defEnv stk =
               Just (NApp _ p2) = IM.lookup app2 hp
             in
               -- Primer cas, el primer paràmetre no esta en WHNF, és a dir, es pot fer algun pas 
-              if not (isWHNF (p1, (aa,hp)) typeEnv) 
+              if (not (isWHNF (p1, (aa,hp)) typeEnv)) || (isVar (p1, (aa,hp)))
                 then pas (p1, (aa,hp)) typeEnv defEnv [] -- pas fet
                 else (
                   -- Segon cas, el segon (i últim) paràmetre no esta en WHNF, és a dir, es pot fer algun pas
-                  if not (isWHNF (p2, (aa,hp)) typeEnv) 
+                  if (not (isWHNF (p2, (aa,hp)) typeEnv)) || (isVar (p2, (aa,hp))) 
                     then pas (p2, (aa,hp)) typeEnv defEnv [] -- pas fet
                     else 
                     (
